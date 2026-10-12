@@ -24,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
   const greeting = hour < 6 ? '夜深了' : hour < 12 ? '早安' : hour < 18 ? '下午好' : '晚上好';
 
   return (
-    <header className="sticky top-0 z-40 ios-glass border-b border-white/[0.08] pt-safe-top px-5 py-3 transition-colors duration-200">
+    <header className="fixed top-0 left-0 right-0 z-40 ios-glass border-b border-white/[0.08] pt-safe-top px-5 py-3 transition-colors duration-200">
       <div className="flex items-center justify-between max-w-lg mx-auto">
         {/* App Title & Date Greeting */}
         <div className="flex flex-col">

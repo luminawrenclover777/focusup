@@ -9,10 +9,11 @@ import {
   CloudRain,
   Radio,
   Flame,
-  Activity
+  Activity,
+  Sparkles
 } from 'lucide-react';
 import type { FocusSession, EnergyMode } from '../types';
-import { db } from '../db';
+import { db, getLocalDate } from '../db';
 import { awardExp, EXP_RULES } from '../services/expService';
 import { soundSynthesizer, type SoundType } from '../services/audioService';
 import { MICRO_MOVEMENTS, type MicroMovement } from '../data/microMovementPresets';
@@ -49,12 +50,11 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
     effectiveSeconds: number;
     pausedSeconds: number;
     earnedExp: number;
+    recommendedMovement: MicroMovement;
+    movementCompleted: boolean;
   } | null>(null);
 
   const [showAbandonAlert, setShowAbandonAlert] = useState<boolean>(false);
-  const [showMicroMovement, setShowMicroMovement] = useState<boolean>(false);
-  const [selectedMovement, setSelectedMovement] = useState<MicroMovement | null>(null);
-  const [movementDone, setMovementDone] = useState<boolean>(false);
 
   const timerIntervalRef = useRef<number | null>(null);
 
@@ -211,13 +211,15 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
     await db.focusSessions.put(completedSession);
     setActiveSession(null);
     soundSynthesizer.stop();
-    setSoundType('none');
+    const randomMovement = MICRO_MOVEMENTS[Math.floor(Math.random() * MICRO_MOVEMENTS.length)];
 
     setSettlementData({
       session: completedSession,
       effectiveSeconds: effective,
       pausedSeconds: paused,
-      earnedExp
+      earnedExp,
+      recommendedMovement: randomMovement,
+      movementCompleted: false
     });
   };
 
@@ -244,7 +246,7 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
 
   const handleConfirmSettlement = async () => {
     if (!settlementData) return;
-    const { session, effectiveSeconds, earnedExp } = settlementData;
+    const { session, effectiveSeconds, earnedExp, recommendedMovement, movementCompleted } = settlementData;
 
     if (earnedExp > 0) {
       await awardExp({
@@ -258,31 +260,36 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
       confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
     }
 
+    if (movementCompleted && recommendedMovement) {
+      await awardExp({
+        dimension: 'body',
+        amount: EXP_RULES.HABIT_ACTIVITY,
+        reason: `久坐微活动: ${recommendedMovement.name}`,
+        sourceType: 'habit_activity',
+        sourceId: `mv_${session.id}`,
+        bypassCap: false
+      });
+      await db.activityEvents.put({
+        id: `act_mv_${Date.now()}`,
+        type: 'micro_movement',
+        createdAt: Date.now(),
+        localDate: getLocalDate(),
+        completed: true,
+        note: recommendedMovement.name
+      });
+    }
+
     await db.focusSessions.update(session.id, { settledAt: Date.now() });
 
     setSettlementData(null);
     refreshData();
-
-    setSelectedMovement(MICRO_MOVEMENTS[Math.floor(Math.random() * MICRO_MOVEMENTS.length)]);
-    setShowMicroMovement(true);
-    setMovementDone(false);
   };
 
-  const handleCompleteMicroMovement = async () => {
-    if (!selectedMovement) return;
-    await db.activityEvents.put({
-      id: `act_mv_${Date.now()}`,
-      type: 'micro_movement',
-      createdAt: Date.now(),
-      localDate: new Date().toISOString().split('T')[0],
-      completed: true,
-      note: selectedMovement.name
-    });
-    setMovementDone(true);
-    setTimeout(() => {
-      setShowMicroMovement(false);
-      refreshData();
-    }, 1000);
+  const handleDiscardSettlement = async () => {
+    if (!settlementData) return;
+    await db.focusSessions.update(settlementData.session.id, { status: 'abandoned' });
+    setSettlementData(null);
+    refreshData();
   };
 
   const toggleSound = (type: SoundType) => {
@@ -555,91 +562,134 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
 
       {/* Settle Modal */}
       {settlementData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-5 animate-fade-in">
-          <div className="w-full max-w-sm bg-[#1C1C1E] border border-white/10 rounded-[24px] p-6 shadow-2xl space-y-5">
-            <div className="text-center">
-              <span className="inline-flex p-3 rounded-full bg-[#0A84FF]/15 text-[#0A84FF] mb-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xl p-4 sm:p-5 animate-fade-in">
+          <div className="w-full max-w-sm bg-[#1C1C1E] border border-white/10 rounded-[28px] p-6 shadow-2xl relative overflow-hidden flex flex-col gap-4 text-white">
+            {/* Ambient Top Glow */}
+            <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-48 bg-[#0A84FF]/20 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Header */}
+            <div className="text-center relative z-10">
+              <span className="inline-flex p-3 rounded-full bg-[#0A84FF]/15 text-[#0A84FF] mb-2 border border-[#0A84FF]/25 shadow-sm">
                 <CheckCircle className="w-7 h-7" />
               </span>
-              <h3 className="text-xl font-bold text-white">专注结算</h3>
+              <h3 className="text-xl font-bold text-white tracking-tight">专注结算</h3>
               <p className="text-xs text-[#8E8E93] mt-1">恭喜完成一段深度心流时光！</p>
             </div>
 
-            <div className="space-y-2.5 bg-[#2C2C2E]/70 rounded-2xl p-4 border border-white/[0.06] text-xs">
-              <div className="flex justify-between py-1">
-                <span className="text-[#8E8E93]">有效专注</span>
-                <span className="text-white font-mono font-bold text-sm">
-                  {Math.floor(settlementData.effectiveSeconds / 60)} 分钟
+            {/* Hero Stat & EXP Badge */}
+            <div className="flex flex-col items-center justify-center py-2 relative z-10">
+              <div className="flex items-baseline">
+                <span className="text-5xl font-mono font-extrabold tracking-tight text-white">
+                  {settlementData.effectiveSeconds >= 60
+                    ? Math.floor(settlementData.effectiveSeconds / 60)
+                    : settlementData.effectiveSeconds}
+                </span>
+                <span className="text-lg font-medium text-[#8E8E93] ml-1.5">
+                  {settlementData.effectiveSeconds >= 60 ? '分钟专注' : '秒专注'}
                 </span>
               </div>
-              <div className="flex justify-between py-1">
-                <span className="text-[#8E8E93]">中途暂停</span>
-                <span className="text-[#8E8E93] font-mono">
-                  {Math.floor(settlementData.pausedSeconds / 60)} 分钟
-                </span>
-              </div>
-              <div className="flex justify-between py-2 border-t border-white/[0.08] items-center">
-                <span className="text-slate-200 font-semibold">获得专注经验</span>
-                <span className="text-[#0A84FF] font-mono font-bold text-base">
-                  +{settlementData.earnedExp} EXP
-                </span>
+
+              <div className="mt-2.5">
+                {settlementData.earnedExp > 0 ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0A84FF]/15 border border-[#0A84FF]/30 text-[#0A84FF] text-xs font-semibold">
+                    <Sparkles className="w-3.5 h-3.5" /> +{settlementData.earnedExp} 专注 EXP
+                  </span>
+                ) : (
+                  <span className="text-xs text-[#8E8E93] bg-white/[0.05] px-3 py-1 rounded-full">
+                    专注不足 1 分钟未折算经验
+                  </span>
+                )}
               </div>
             </div>
 
-            <button
-              onClick={handleConfirmSettlement}
-              className="w-full h-12 rounded-2xl bg-[#0A84FF] hover:bg-blue-400 active:scale-95 text-white font-bold text-sm shadow-lg shadow-blue-500/25 transition-all cursor-pointer"
-            >
-              确认入账并继续
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Sedentary Awakening Sheet/Modal */}
-      {showMicroMovement && selectedMovement && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-5 animate-fade-in">
-          <div className="w-full max-w-sm bg-[#1C1C1E] border border-emerald-500/30 rounded-[24px] p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-[#30D158]" />
-                <h3 className="text-sm font-bold text-white">久坐微放松建议</h3>
+            {/* Breakdown Stats Grid */}
+            <div className="grid grid-cols-2 gap-2 relative z-10 text-xs">
+              <div className="p-3 rounded-2xl bg-[#2C2C2E]/60 border border-white/[0.06] text-center">
+                <div className="text-[11px] text-[#8E8E93] mb-0.5">总计时长</div>
+                <div className="font-mono font-bold text-sm text-slate-200">
+                  {formatTime(settlementData.effectiveSeconds + settlementData.pausedSeconds)}
+                </div>
               </div>
-              <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-[#30D158] font-medium border border-emerald-500/20">
-                {selectedMovement.category === 'desk' ? '工位隐蔽' : '离座活动'}
-              </span>
+              <div className="p-3 rounded-2xl bg-[#2C2C2E]/60 border border-white/[0.06] text-center">
+                <div className="text-[11px] text-[#8E8E93] mb-0.5">中途暂停</div>
+                <div className="font-mono font-bold text-sm text-[#8E8E93]">
+                  {formatTime(settlementData.pausedSeconds)}
+                </div>
+              </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-[#2C2C2E]/70 border border-white/[0.06]">
-              <div className="flex items-baseline justify-between mb-1.5">
-                <h4 className="text-sm font-bold text-emerald-300">{selectedMovement.name}</h4>
-                <span className="text-xs text-[#8E8E93] font-mono">约 {selectedMovement.durationSeconds} 秒</span>
-              </div>
-              <p className="text-xs text-slate-200 leading-relaxed">
-                {selectedMovement.description}
-              </p>
-            </div>
-
-            {movementDone ? (
-              <div className="p-3 rounded-2xl bg-emerald-950/60 text-center text-xs text-emerald-300 font-medium">
-                ✓ 已完成微活动放松 (+5 活力)
-              </div>
-            ) : (
-              <div className="flex items-center gap-3">
+            {/* Integrated Micro-Movement Relaxation Card */}
+            {settlementData.recommendedMovement && (
+              <div className="p-3.5 rounded-2xl bg-[#2C2C2E]/40 border border-white/[0.08] relative z-10">
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <Activity className="w-3.5 h-3.5 text-[#30D158]" />
+                    <span className="text-xs font-bold text-slate-200">久坐微放松</span>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-[#30D158] font-medium border border-emerald-500/20">
+                    {settlementData.recommendedMovement.category === 'desk' ? '工位隐蔽' : '离座活动'} · 约 {settlementData.recommendedMovement.durationSeconds}s
+                  </span>
+                </div>
+                <div className="text-xs font-semibold text-emerald-300 mb-1">
+                  {settlementData.recommendedMovement.name}
+                </div>
+                <p className="text-[11px] text-[#8E8E93] leading-relaxed mb-2.5">
+                  {settlementData.recommendedMovement.description}
+                </p>
                 <button
-                  onClick={handleCompleteMicroMovement}
-                  className="flex-1 h-11 rounded-2xl bg-[#30D158] hover:bg-emerald-400 text-white font-semibold text-xs shadow-sm transition-all active:scale-95"
+                  type="button"
+                  onClick={() =>
+                    setSettlementData(prev =>
+                      prev ? { ...prev, movementCompleted: !prev.movementCompleted } : null
+                    )
+                  }
+                  className={`w-full py-2 px-3 rounded-xl flex items-center justify-center gap-2 text-xs font-medium transition-all cursor-pointer ${
+                    settlementData.movementCompleted
+                      ? 'bg-[#30D158]/20 text-[#30D158] border border-[#30D158]/40 shadow-sm'
+                      : 'bg-white/[0.06] hover:bg-white/[0.1] text-slate-300 border border-white/[0.08]'
+                  }`}
                 >
-                  已做完 (+5 活力)
-                </button>
-                <button
-                  onClick={() => setShowMicroMovement(false)}
-                  className="h-11 px-4 rounded-2xl bg-[#2C2C2E] text-[#8E8E93] text-xs hover:text-white"
-                >
-                  稍后再做
+                  <span
+                    className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] transition-colors ${
+                      settlementData.movementCompleted
+                        ? 'bg-[#30D158] text-black font-bold'
+                        : 'border border-[#8E8E93]'
+                    }`}
+                  >
+                    {settlementData.movementCompleted ? '✓' : ''}
+                  </span>
+                  <span>
+                    {settlementData.movementCompleted
+                      ? '微活动已完成 (+5 活力)'
+                      : '顺便做一下微放松 (+5 活力)'}
+                  </span>
                 </button>
               </div>
             )}
+
+            {/* Actions: Big Primary Button & Discard */}
+            <div className="space-y-2 pt-1 relative z-10">
+              <button
+                type="button"
+                onClick={handleConfirmSettlement}
+                className="w-full h-14 rounded-2xl bg-[#0A84FF] hover:bg-blue-400 active:scale-[0.98] text-white font-bold text-base shadow-xl shadow-blue-500/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
+              >
+                <span>确认入账并继续</span>
+                {(settlementData.earnedExp > 0 || settlementData.movementCompleted) && (
+                  <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-mono font-semibold">
+                    +{settlementData.earnedExp + (settlementData.movementCompleted ? 5 : 0)} EXP
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDiscardSettlement}
+                className="w-full py-2 text-center text-xs text-[#8E8E93] hover:text-[#FF453A] transition-colors cursor-pointer"
+              >
+                放弃本次记录
+              </button>
+            </div>
           </div>
         </div>
       )}

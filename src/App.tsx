@@ -140,8 +140,8 @@ export const App: React.FC = () => {
         todayCompletedCount={todayCompletedCount}
       />
 
-      {/* Main Content View */}
-      <main className="flex-1 w-full max-w-lg mx-auto">
+      {/* Main Content View with top offset for fixed header */}
+      <main className="flex-1 w-full max-w-lg mx-auto pt-[calc(80px+env(safe-area-inset-top))]">
         {activeTab === 'today' && (
           <TodayTab
             energyMode={energyMode}
