@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="128" fill="#0E1017"/>
+  <defs>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A84FF"/>
+      <stop offset="50%" stop-color="#30D158"/>
+      <stop offset="100%" stop-color="#FF9F0A"/>
+    </linearGradient>
+  </defs>
+  <!-- Triangle / Upward arrow dynamic geometry representing 3 dimensions: Focus, Body, Voice -->
+  <circle cx="256" cy="256" r="168" stroke="#1C2130" stroke-width="16" />
+  <path d="M256 126 L376 332 H136 Z" stroke="url(#glow)" stroke-width="24" stroke-linejoin="round" fill="rgba(10, 132, 255, 0.12)"/>
+  <circle cx="256" cy="126" r="22" fill="#0A84FF"/>
+  <circle cx="376" cy="332" r="22" fill="#30D158"/>
+  <circle cx="136" cy="332" r="22" fill="#FF9F0A"/>
+</svg>
