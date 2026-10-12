@@ -130,7 +130,7 @@ export const App: React.FC = () => {
   const todayCompletedCount = (todayHabit.protein ? 1 : 0) + (todayHabit.sleep ? 1 : 0) + (todayHabit.activity ? 1 : 0) + dailyCounts.interceptCount + dailyCounts.stopLossCount;
 
   return (
-    <div className="min-h-screen bg-dark-900 text-slate-100 flex flex-col justify-between pb-16 selection:bg-blue-500 selection:text-white">
+    <div className="min-h-screen bg-black text-[#F2F2F7] flex flex-col justify-between pb-20 selection:bg-[#007AFF] selection:text-white">
       {/* Header */}
       <Header
         energyMode={energyMode}
@@ -141,7 +141,7 @@ export const App: React.FC = () => {
       />
 
       {/* Main Content View */}
-      <main className="flex-1 w-full max-w-md mx-auto">
+      <main className="flex-1 w-full max-w-lg mx-auto">
         {activeTab === 'today' && (
           <TodayTab
             energyMode={energyMode}

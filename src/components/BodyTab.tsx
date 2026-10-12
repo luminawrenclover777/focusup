@@ -1,91 +1,92 @@
 import React, { useState, useEffect } from 'react';
 import {
+  Dumbbell,
+  CheckCircle2,
   Plus,
   Scale,
-  Trash2
+  Flame,
+  Footprints,
+  Sparkles
 } from 'lucide-react';
 import type { BodyPart, WorkoutSet, BodyMetric } from '../types';
 import { db, getLocalDate } from '../db';
-import { EXERCISE_PRESETS, BODY_PART_LABELS } from '../data/exercisePresets';
-import { awardExp, revertExp, EXP_RULES, getDailyCapInfo } from '../services/expService';
+import { awardExp, EXP_RULES, getDailyCapInfo } from '../services/expService';
 import confetti from 'canvas-confetti';
 
 interface BodyTabProps {
   refreshData: () => void;
 }
 
+interface RoutinePreset {
+  id: string;
+  name: string;
+  desc: string;
+  bodyPart: BodyPart;
+  icon: any;
+  defaultReps: number;
+}
+
+const QUICK_ROUTINES: RoutinePreset[] = [
+  {
+    id: 'walk_steps',
+    name: '日常健步 / 步数达标',
+    desc: '户外散步、通勤走动 30 分钟，激活下肢循环',
+    bodyPart: 'legs',
+    icon: Footprints,
+    defaultReps: 3000
+  },
+  {
+    id: 'desk_stretch',
+    name: '全身拉伸 / 筋膜舒展',
+    desc: '久坐肩颈放松、胸椎伸展与腿后侧拉伸 10 分钟',
+    bodyPart: 'back',
+    icon: Sparkles,
+    defaultReps: 10
+  },
+  {
+    id: 'bodyweight_power',
+    name: '自重力量唤醒',
+    desc: '俯卧撑、深蹲或靠墙静蹲，激活核心与上肢力量',
+    bodyPart: 'chest',
+    icon: Dumbbell,
+    defaultReps: 20
+  },
+  {
+    id: 'cardio_activation',
+    name: '有氧心肺激活',
+    desc: '慢跑、跳绳、开合跳或动感单车，微汗排湿',
+    bodyPart: 'core',
+    icon: Flame,
+    defaultReps: 15
+  }
+];
+
 export const BodyTab: React.FC<BodyTabProps> = ({ refreshData }) => {
-  const [selectedPart, setSelectedPart] = useState<BodyPart>('shoulder');
-  const [selectedExercise, setSelectedExercise] = useState<string>(EXERCISE_PRESETS[0].id);
-  const [customExerciseName, setCustomExerciseName] = useState<string>('');
-  const [isCustomMode, setIsCustomMode] = useState<boolean>(false);
-
-  // Set Inputs
-  const [setNumber, setSetNumber] = useState<number>(3);
-  const [reps, setReps] = useState<number>(12);
-  const [weightKg, setWeightKg] = useState<string>('');
-  const [assistance, setAssistance] = useState<string>('');
-
-  // History & Comparison
-  const [lastWorkoutSet, setLastWorkoutSet] = useState<WorkoutSet | null>(null);
-  const [maxWorkoutSet, setMaxWorkoutSet] = useState<WorkoutSet | null>(null);
-  const [recentSets, setRecentSets] = useState<WorkoutSet[]>([]);
-  const [hoursSinceLastPart, setHoursSinceLastPart] = useState<number | null>(null);
-
-  // Daily caps
   const [dailyCap, setDailyCap] = useState<{ used: number; max: number; remaining: number }>({ used: 0, max: 2, remaining: 2 });
+  const [todayCompletedSets, setTodayCompletedSets] = useState<WorkoutSet[]>([]);
+  const [showCustomModal, setShowCustomModal] = useState<boolean>(false);
+  const [showWeightSection, setShowWeightSection] = useState<boolean>(false);
+
+  // Custom Workout input
+  const [customName, setCustomName] = useState<string>('');
+  const [customSets, setCustomSets] = useState<number>(3);
+  const [customReps, setCustomReps] = useState<number>(12);
+  const [customWeight, setCustomWeight] = useState<string>('');
 
   // Body Metrics
   const [weightInput, setWeightInput] = useState<string>('');
-  const [waistInput, setWaistInput] = useState<string>('');
   const [recentMetrics, setRecentMetrics] = useState<BodyMetric[]>([]);
-  const [showMetricSection, setShowMetricSection] = useState<boolean>(false);
-
-  const loadExerciseComparison = async (exerciseId: string, part: BodyPart) => {
-    const previousSets = await db.workoutSets
-      .where('exerciseId')
-      .equals(exerciseId)
-      .reverse()
-      .sortBy('createdAt');
-
-    if (previousSets.length > 0) {
-      setLastWorkoutSet(previousSets[0]);
-
-      let best = previousSets[0];
-      let bestScore = (best.weightKg || 1) * best.reps * best.setNumber;
-      for (const s of previousSets) {
-        const score = (s.weightKg || 1) * s.reps * s.setNumber;
-        if (score > bestScore) {
-          bestScore = score;
-          best = s;
-        }
-      }
-      setMaxWorkoutSet(best);
-    } else {
-      setLastWorkoutSet(null);
-      setMaxWorkoutSet(null);
-    }
-
-    const partSets = await db.workoutSets
-      .where('bodyPart')
-      .equals(part)
-      .reverse()
-      .sortBy('createdAt');
-
-    if (partSets.length > 0) {
-      const diffHours = Math.floor((Date.now() - partSets[0].createdAt) / (1000 * 60 * 60));
-      setHoursSinceLastPart(diffHours);
-    } else {
-      setHoursSinceLastPart(null);
-    }
-  };
 
   const loadData = async () => {
     const cap = await getDailyCapInfo('workout');
     setDailyCap(cap);
 
-    const allRecent = await db.workoutSets.orderBy('createdAt').reverse().limit(6).toArray();
-    setRecentSets(allRecent);
+    const sets = await db.workoutSets
+      .where('createdAt')
+      .above(Date.now() - 24 * 60 * 60 * 1000)
+      .reverse()
+      .toArray();
+    setTodayCompletedSets(sets);
 
     const metrics = await db.bodyMetrics.orderBy('createdAt').reverse().limit(3).toArray();
     setRecentMetrics(metrics);
@@ -95,340 +96,309 @@ export const BodyTab: React.FC<BodyTabProps> = ({ refreshData }) => {
     loadData();
   }, []);
 
-  useEffect(() => {
-    loadExerciseComparison(selectedExercise, selectedPart);
-  }, [selectedExercise, selectedPart]);
-
-  const handlePartChange = (part: BodyPart) => {
-    setSelectedPart(part);
-    setIsCustomMode(false);
-    const presetsForPart = EXERCISE_PRESETS.filter((ex) => ex.bodyPart === part);
-    if (presetsForPart.length > 0) {
-      setSelectedExercise(presetsForPart[0].id);
-    }
-  };
-
-  const handleSaveSet = async () => {
+  // Quick Routine check-in
+  const handleQuickCheckin = async (routine: RoutinePreset) => {
     const today = getLocalDate();
-    let exerciseId = selectedExercise;
-    let exerciseName = '';
-
-    if (isCustomMode) {
-      if (!customExerciseName.trim()) {
-        alert('请输入动作名称');
-        return;
-      }
-      exerciseId = `custom_${customExerciseName.trim()}`;
-      exerciseName = customExerciseName.trim();
-    } else {
-      const preset = EXERCISE_PRESETS.find((e) => e.id === selectedExercise);
-      exerciseName = preset ? preset.name : '训练动作';
-    }
-
-    const setId = `ws_${Date.now()}`;
-    const parsedWeight = weightKg.trim() ? parseFloat(weightKg) : undefined;
-
+    const setId = `wset_${Date.now()}`;
     const newSet: WorkoutSet = {
       id: setId,
-      sessionId: `sess_${today}`,
-      exerciseId,
-      exerciseName,
-      bodyPart: selectedPart,
-      setNumber: Math.max(1, setNumber),
-      reps: Math.max(1, reps),
-      weightKg: parsedWeight,
-      assistance: assistance.trim() || undefined,
+      sessionId: `wsess_${today}`,
+      exerciseId: routine.id,
+      exerciseName: routine.name,
+      bodyPart: routine.bodyPart,
+      setNumber: 1,
+      reps: routine.defaultReps,
       createdAt: Date.now()
     };
-
-    const currentScore = (parsedWeight || 1) * newSet.reps * newSet.setNumber;
-    let isBreakthrough = false;
-
-    if (maxWorkoutSet) {
-      const maxScore = (maxWorkoutSet.weightKg || 1) * maxWorkoutSet.reps * maxWorkoutSet.setNumber;
-      if (currentScore > maxScore) {
-        isBreakthrough = true;
-      }
-    }
 
     await db.workoutSets.put(newSet);
 
     const tx = await awardExp({
       dimension: 'body',
       amount: EXP_RULES.WORKOUT,
-      reason: `记录训练：${exerciseName} (${newSet.setNumber}组 × ${newSet.reps}次)`,
-      sourceType: 'workout',
+      reason: `完成身体活力训练 (${routine.name})`,
+      sourceType: 'workout_set',
       sourceId: setId,
       localDate: today
     });
 
-    if (isBreakthrough) {
-      await awardExp({
-        dimension: 'body',
-        amount: EXP_RULES.WORKOUT_BREAKTHROUGH,
-        reason: `个人突破！超越历史记录：${exerciseName}`,
-        sourceType: 'workout_breakthrough',
-        sourceId: setId,
-        localDate: today
-      });
-      confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
-    } else if (tx) {
-      confetti({ particleCount: 25, spread: 45, origin: { y: 0.7 } });
+    if (tx) {
+      confetti({ particleCount: 45, spread: 60, origin: { y: 0.6 } });
     }
 
-    setAssistance('');
     loadData();
-    loadExerciseComparison(exerciseId, selectedPart);
     refreshData();
   };
 
-  const handleDeleteSet = async (set: WorkoutSet) => {
-    if (window.confirm(`删除该条记录？EXP 将自动冲正。`)) {
-      await db.workoutSets.delete(set.id);
-      await revertExp({
-        sourceType: 'workout',
-        sourceId: set.id,
-        reason: `删除训练记录 ${set.exerciseName}`
-      });
-      await revertExp({
-        sourceType: 'workout_breakthrough',
-        sourceId: set.id,
-        reason: `删除个人突破记录 ${set.exerciseName}`
-      });
-
-      loadData();
-      loadExerciseComparison(selectedExercise, selectedPart);
-      refreshData();
+  // Custom workout save
+  const handleSaveCustomWorkout = async () => {
+    if (!customName.trim()) {
+      alert('请输入动作名称');
+      return;
     }
+    const today = getLocalDate();
+    const setId = `wset_${Date.now()}`;
+    const wKg = customWeight ? parseFloat(customWeight) : undefined;
+
+    const newSet: WorkoutSet = {
+      id: setId,
+      sessionId: `wsess_${today}`,
+      exerciseId: `custom_${Date.now()}`,
+      exerciseName: customName.trim(),
+      bodyPart: 'chest',
+      setNumber: customSets,
+      reps: customReps,
+      weightKg: wKg,
+      createdAt: Date.now()
+    };
+
+    await db.workoutSets.put(newSet);
+
+    await awardExp({
+      dimension: 'body',
+      amount: EXP_RULES.WORKOUT,
+      reason: `自定义力量打卡: ${customName.trim()} (${customSets}组 × ${customReps}次)`,
+      sourceType: 'workout_set',
+      sourceId: setId,
+      localDate: today
+    });
+
+    confetti({ particleCount: 45, spread: 60, origin: { y: 0.6 } });
+    setShowCustomModal(false);
+    setCustomName('');
+    loadData();
+    refreshData();
   };
 
-  const handleSaveMetric = async () => {
-    const today = getLocalDate();
-    const w = weightInput ? parseFloat(weightInput) : undefined;
-    const wst = waistInput ? parseFloat(waistInput) : undefined;
-
-    if (!w && !wst) return;
+  // Body Metric Save
+  const handleSaveWeight = async () => {
+    if (!weightInput) return;
+    const w = parseFloat(weightInput);
+    if (isNaN(w) || w <= 0) return;
 
     await db.bodyMetrics.put({
-      id: `bm_${Date.now()}`,
-      localDate: today,
+      id: `metric_${Date.now()}`,
+      localDate: getLocalDate(),
       weightKg: w,
-      waistCm: wst,
       createdAt: Date.now()
     });
 
     setWeightInput('');
-    setWaistInput('');
     loadData();
   };
 
-  const filteredPresets = EXERCISE_PRESETS.filter((ex) => ex.bodyPart === selectedPart);
-
   return (
-    <div className="space-y-3.5 px-4 py-3 max-w-md mx-auto">
+    <div className="space-y-6 px-5 py-4 max-w-lg mx-auto pb-28">
       {/* Top Bar */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-bold text-white tracking-tight">薄肌力量</h2>
-          <p className="text-[11px] text-slate-400 mt-0.5">
-            {hoursSinceLastPart !== null
-              ? `距上次练${BODY_PART_LABELS[selectedPart]}约 ${hoursSinceLastPart}h`
-              : '渐进负荷 · 记录成长'}
-          </p>
+          <h2 className="text-2xl font-bold text-white tracking-tight">身体活力</h2>
+          <p className="text-xs text-[#8E8E93] mt-1">远离久坐 · 唤醒肌肉 · 保持充沛精力</p>
         </div>
-        <span className="text-[11px] font-mono text-slate-400 px-2 py-0.5 rounded-full bg-dark-800 border border-white/[0.06]">
-          今日 {dailyCap.used}/{dailyCap.max} 组
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-mono text-[#8E8E93] px-3 py-1 rounded-full bg-[#1C1C1E] border border-white/10">
+            今日 {dailyCap.used}/{dailyCap.max}
+          </span>
+          <button
+            onClick={() => setShowWeightSection(!showWeightSection)}
+            className="w-10 h-10 rounded-full bg-[#1C1C1E] border border-white/10 text-slate-300 hover:text-white flex items-center justify-center active:scale-95 transition-all shadow-sm"
+            title="体重记录"
+          >
+            <Scale className="w-4 h-4 text-emerald-400" />
+          </button>
+        </div>
       </div>
 
-      {/* Body Part Segmented Tabs */}
-      <div className="flex items-center p-1 rounded-xl bg-dark-900/80 border border-white/[0.06]">
-        {(Object.keys(BODY_PART_LABELS) as BodyPart[]).map((part) => {
-          const isSelected = selectedPart === part;
-          return (
+      {/* Weight Section (Collapsible) */}
+      {showWeightSection && (
+        <div className="p-5 rounded-3xl bg-[#1C1C1E] border border-emerald-500/30 space-y-3 animate-fade-in shadow-md">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-bold text-white flex items-center gap-2">
+              <Scale className="w-4 h-4 text-emerald-400" />
+              体重记录 (kg)
+            </span>
+            {recentMetrics[0]?.weightKg && (
+              <span className="text-xs text-emerald-400 font-mono font-semibold">
+                最新: {recentMetrics[0].weightKg} kg
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              step="0.1"
+              placeholder="输入今日体重，如 68.5"
+              value={weightInput}
+              onChange={(e) => setWeightInput(e.target.value)}
+              className="flex-1 h-12 px-4 rounded-2xl bg-[#2C2C2E] border border-white/[0.08] text-sm text-white focus:outline-none focus:border-emerald-500/50"
+            />
             <button
-              key={part}
-              onClick={() => handlePartChange(part)}
-              className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                isSelected
-                  ? 'bg-emerald-500 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
+              onClick={handleSaveWeight}
+              className="h-12 px-5 rounded-2xl bg-[#34C759] text-white font-semibold text-sm active:scale-95 shadow-sm"
             >
-              {BODY_PART_LABELS[part]}
+              保存
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* 4 Easy Routine Cards */}
+      <div className="space-y-3.5">
+        <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider block px-1">
+          今日身体激活 · 点击即打卡
+        </span>
+
+        {QUICK_ROUTINES.map((routine) => {
+          const Icon = routine.icon;
+          const isDoneToday = todayCompletedSets.some((s) => s.exerciseId === routine.id);
+
+          return (
+            <div
+              key={routine.id}
+              className="p-5 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between gap-4 shadow-sm hover:bg-[#242426] transition-all"
+            >
+              <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                <span className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
+                  isDoneToday ? 'bg-emerald-500/20 text-emerald-400' : 'bg-[#2C2C2E] text-slate-200'
+                }`}>
+                  <Icon className="w-6 h-6" />
+                </span>
+                <div className="min-w-0">
+                  <h4 className="text-base font-bold text-white truncate">{routine.name}</h4>
+                  <p className="text-xs text-[#8E8E93] mt-0.5 line-clamp-1">{routine.desc}</p>
+                </div>
+              </div>
+
+              {isDoneToday ? (
+                <span className="h-11 px-4 rounded-2xl bg-emerald-500/15 text-emerald-400 font-semibold text-xs flex items-center gap-1.5 shrink-0 border border-emerald-500/20">
+                  <CheckCircle2 className="w-4 h-4" />
+                  已达标
+                </span>
+              ) : (
+                <button
+                  onClick={() => handleQuickCheckin(routine)}
+                  className="h-11 px-4 rounded-2xl bg-[#34C759] hover:bg-emerald-400 active:scale-95 text-white font-semibold text-xs shadow-md shadow-green-500/20 transition-all shrink-0 flex items-center gap-1.5"
+                >
+                  <Plus className="w-4 h-4" />
+                  打卡 +25
+                </button>
+              )}
+            </div>
           );
         })}
       </div>
 
-      {/* Exercise Input Card */}
-      <div className="p-3.5 rounded-2xl bg-dark-800/70 border border-white/[0.07] space-y-2.5">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-300">动作选择</span>
-          <button
-            onClick={() => setIsCustomMode(!isCustomMode)}
-            className="text-[11px] text-emerald-400 hover:text-emerald-300 font-medium"
-          >
-            {isCustomMode ? '选择预设' : '+ 自定义'}
-          </button>
+      {/* Custom Workout Card / Trigger */}
+      <div className="p-5 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between shadow-sm">
+        <div>
+          <h4 className="text-base font-bold text-white">进阶力量训练记录</h4>
+          <p className="text-xs text-[#8E8E93] mt-0.5">有器械或专项训练？可记录组数与负重</p>
         </div>
-
-        {isCustomMode ? (
-          <input
-            type="text"
-            placeholder="动作名称"
-            value={customExerciseName}
-            onChange={(e) => setCustomExerciseName(e.target.value)}
-            className="w-full px-3 py-1.5 rounded-xl bg-dark-900/70 border border-white/[0.08] text-xs text-white focus:outline-none"
-          />
-        ) : (
-          <select
-            value={selectedExercise}
-            onChange={(e) => setSelectedExercise(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl bg-dark-900/70 border border-white/[0.08] text-xs text-white focus:outline-none"
-          >
-            {filteredPresets.map((ex) => (
-              <option key={ex.id} value={ex.id}>
-                {ex.name} {ex.isBodyweight ? '(自重)' : ''}
-              </option>
-            ))}
-          </select>
-        )}
-
-        {/* 3 Number Inputs */}
-        <div className="grid grid-cols-3 gap-2">
-          <div>
-            <span className="text-[10px] text-slate-500 block mb-1">组数</span>
-            <input
-              type="number"
-              min="1"
-              value={setNumber}
-              onChange={(e) => setSetNumber(parseInt(e.target.value) || 1)}
-              className="w-full py-1.5 bg-dark-900/70 border border-white/[0.06] rounded-xl text-center font-mono font-bold text-white text-xs focus:outline-none"
-            />
-          </div>
-          <div>
-            <span className="text-[10px] text-slate-500 block mb-1">次数</span>
-            <input
-              type="number"
-              min="1"
-              value={reps}
-              onChange={(e) => setReps(parseInt(e.target.value) || 1)}
-              className="w-full py-1.5 bg-dark-900/70 border border-white/[0.06] rounded-xl text-center font-mono font-bold text-white text-xs focus:outline-none"
-            />
-          </div>
-          <div>
-            <span className="text-[10px] text-slate-500 block mb-1">重量 (kg)</span>
-            <input
-              type="number"
-              step="0.5"
-              placeholder="自重"
-              value={weightKg}
-              onChange={(e) => setWeightKg(e.target.value)}
-              className="w-full py-1.5 bg-dark-900/70 border border-white/[0.06] rounded-xl text-center font-mono font-bold text-white text-xs focus:outline-none placeholder-slate-600"
-            />
-          </div>
-        </div>
-
-        {/* Past Comparison */}
-        {lastWorkoutSet && (
-          <div className="text-[11px] text-slate-400 py-1 flex items-center justify-between">
-            <span>上次：{lastWorkoutSet.setNumber}组 × {lastWorkoutSet.reps}次 {lastWorkoutSet.weightKg ? `@ ${lastWorkoutSet.weightKg}kg` : ''}</span>
-            <span className="text-emerald-400/80 font-medium">历史参照</span>
-          </div>
-        )}
-
         <button
-          onClick={handleSaveSet}
-          className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1 transition-all"
+          onClick={() => setShowCustomModal(true)}
+          className="h-11 px-4 rounded-2xl bg-[#2C2C2E] hover:bg-[#3A3A3C] text-slate-200 font-semibold text-xs border border-white/10 active:scale-95 transition-all"
         >
-          <Plus className="w-3.5 h-3.5" />
-          保存记录 (+{EXP_RULES.WORKOUT} Body EXP)
+          添加记录
         </button>
       </div>
 
-      {/* Metric Tracker */}
-      <div className="p-3 rounded-2xl bg-dark-800/50 border border-white/[0.05]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-xs text-slate-300 font-medium">
-            <Scale className="w-3.5 h-3.5 text-emerald-400" />
-            <span>体重 & 腰围 (选填)</span>
-          </div>
-          <button
-            onClick={() => setShowMetricSection(!showMetricSection)}
-            className="text-[11px] text-emerald-400 font-medium"
-          >
-            {showMetricSection ? '收起' : '记录'}
-          </button>
-        </div>
-
-        {showMetricSection && (
-          <div className="mt-2.5 pt-2 border-t border-white/[0.05] space-y-2 animate-fade-in">
-            <div className="grid grid-cols-2 gap-2">
-              <input
-                type="number"
-                step="0.1"
-                placeholder="体重 kg"
-                value={weightInput}
-                onChange={(e) => setWeightInput(e.target.value)}
-                className="w-full px-2.5 py-1.5 rounded-xl bg-dark-900/70 border border-white/[0.06] text-xs text-white focus:outline-none"
-              />
-              <input
-                type="number"
-                step="0.5"
-                placeholder="腰围 cm"
-                value={waistInput}
-                onChange={(e) => setWaistInput(e.target.value)}
-                className="w-full px-2.5 py-1.5 rounded-xl bg-dark-900/70 border border-white/[0.06] text-xs text-white focus:outline-none"
-              />
-            </div>
-            <button
-              onClick={handleSaveMetric}
-              className="w-full py-1.5 rounded-xl bg-dark-700 text-slate-200 text-xs font-medium"
-            >
-              保存身体指标
-            </button>
-            {recentMetrics.length > 0 && (
-              <div className="space-y-1 text-[10px] text-slate-400 pt-1">
-                {recentMetrics.map((m) => (
-                  <div key={m.id} className="flex justify-between py-0.5 border-b border-white/[0.04]">
-                    <span>{m.localDate}</span>
-                    <span className="font-mono text-slate-300">
-                      {m.weightKg ? `${m.weightKg}kg` : ''} {m.waistCm ? `· 腰围 ${m.waistCm}cm` : ''}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Recent Workout Sets */}
-      {recentSets.length > 0 && (
-        <div className="space-y-1.5 pt-1">
-          <span className="text-[11px] font-bold text-slate-400 px-1">近期记录</span>
-          <div className="space-y-1.5">
-            {recentSets.map((s) => (
+      {/* Today Completed Sets Log */}
+      {todayCompletedSets.length > 0 && (
+        <div className="space-y-3">
+          <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider block px-1">
+            今日完成动态
+          </span>
+          <div className="space-y-2">
+            {todayCompletedSets.map((set) => (
               <div
-                key={s.id}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-dark-800/60 border border-white/[0.05]"
+                key={set.id}
+                className="p-4 rounded-2xl bg-[#1C1C1E] border border-white/[0.06] flex items-center justify-between text-xs text-[#8E8E93]"
               >
-                <div>
-                  <span className="text-xs font-bold text-white mr-1.5">{s.exerciseName}</span>
-                  <span className="text-[10px] text-slate-400">
-                    {s.setNumber}组 × {s.reps}次 {s.weightKg ? `@ ${s.weightKg}kg` : ''}
-                  </span>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span className="text-sm font-semibold text-white">{set.exerciseName}</span>
                 </div>
-                <button
-                  onClick={() => handleDeleteSet(s)}
-                  className="p-1 rounded text-slate-500 hover:text-rose-400"
-                  title="删除"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                <span className="font-mono text-emerald-400 font-semibold">+25 Body EXP</span>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Custom Workout Modal */}
+      {showCustomModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-5 animate-fade-in">
+          <div className="w-full max-w-sm bg-[#1C1C1E] border border-white/10 rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white">记录进阶训练</h3>
+              <button
+                onClick={() => setShowCustomModal(false)}
+                className="text-[#8E8E93] hover:text-white text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-[#8E8E93] block mb-1">动作名称</label>
+                <input
+                  type="text"
+                  placeholder="如：哑铃侧平举、引体向上"
+                  value={customName}
+                  onChange={(e) => setCustomName(e.target.value)}
+                  className="w-full h-11 px-3.5 rounded-xl bg-[#2C2C2E] border border-white/[0.08] text-sm text-white focus:outline-none focus:border-emerald-500/50"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="text-xs text-[#8E8E93] block mb-1">完成组数</label>
+                  <input
+                    type="number"
+                    value={customSets}
+                    onChange={(e) => setCustomSets(parseInt(e.target.value) || 1)}
+                    className="w-full h-11 px-3.5 rounded-xl bg-[#2C2C2E] border border-white/[0.08] text-sm text-white focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-[#8E8E93] block mb-1">每组次数</label>
+                  <input
+                    type="number"
+                    value={customReps}
+                    onChange={(e) => setCustomReps(parseInt(e.target.value) || 1)}
+                    className="w-full h-11 px-3.5 rounded-xl bg-[#2C2C2E] border border-white/[0.08] text-sm text-white focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-[#8E8E93] block mb-1">负重 (kg，自重可留空)</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  placeholder="自重留空或填 0"
+                  value={customWeight}
+                  onChange={(e) => setCustomWeight(e.target.value)}
+                  className="w-full h-11 px-3.5 rounded-xl bg-[#2C2C2E] border border-white/[0.08] text-sm text-white focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                onClick={handleSaveCustomWorkout}
+                className="flex-1 h-13 rounded-2xl bg-[#34C759] hover:bg-emerald-400 text-white font-bold text-sm shadow-md transition-all active:scale-95"
+              >
+                保存打卡 (+25 EXP)
+              </button>
+              <button
+                onClick={() => setShowCustomModal(false)}
+                className="h-13 px-4 rounded-2xl bg-[#2C2C2E] text-slate-300 text-sm hover:text-white"
+              >
+                取消
+              </button>
+            </div>
           </div>
         </div>
       )}

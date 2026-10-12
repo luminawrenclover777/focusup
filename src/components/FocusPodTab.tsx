@@ -309,40 +309,40 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
   }
 
   return (
-    <div className="space-y-4 px-4 py-3 max-w-md mx-auto">
+    <div className="space-y-6 px-5 py-4 max-w-lg mx-auto pb-28">
       {/* Timer Display Card */}
-      <div className="relative overflow-hidden p-6 rounded-3xl bg-dark-800/80 border border-white/[0.08] shadow-xl flex flex-col items-center">
+      <div className="p-7 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] shadow-lg flex flex-col items-center">
         {/* Top Status */}
-        <div className="w-full flex items-center justify-between text-xs text-slate-400 mb-2">
-          <span className="flex items-center gap-1.5 font-medium">
-            <span className={`w-2 h-2 rounded-full ${activeSession ? (isPaused ? 'bg-amber-400' : 'bg-emerald-400 animate-pulse') : 'bg-slate-600'}`} />
-            {activeSession ? (isPaused ? '已暂停' : '专注中') : '准备开始'}
+        <div className="w-full flex items-center justify-between text-sm text-[#8E8E93] mb-3">
+          <span className="flex items-center gap-2 font-medium">
+            <span className={`w-2.5 h-2.5 rounded-full ${activeSession ? (isPaused ? 'bg-amber-400' : 'bg-emerald-400 animate-pulse') : 'bg-[#636366]'}`} />
+            <span className="text-slate-200">{activeSession ? (isPaused ? '已暂停' : '专注心流中') : '准备开始'}</span>
           </span>
-          <span className="text-[11px] text-slate-400">
-            {activeSession?.mode === 'stopwatch' ? '心流正向' : `${activeSession?.targetSeconds ? Math.floor(activeSession.targetSeconds / 60) + 'm 倒计时' : ''}`}
+          <span className="text-xs px-3 py-1 rounded-full bg-[#2C2C2E] text-slate-300 font-medium">
+            {activeSession?.mode === 'stopwatch' ? '心流正向' : `${activeSession?.targetSeconds ? Math.floor(activeSession.targetSeconds / 60) + ' 分钟倒计时' : '未开始'}`}
           </span>
         </div>
 
         {/* Circular Progress & Clock */}
-        <div className="relative my-2 flex items-center justify-center">
-          <svg className="w-56 h-56 -rotate-90">
+        <div className="relative my-4 flex items-center justify-center">
+          <svg className="w-64 h-64 -rotate-90">
             <circle
-              cx="112"
-              cy="112"
-              r="96"
-              stroke="#1A1E2C"
-              strokeWidth="6"
+              cx="128"
+              cy="128"
+              r="110"
+              stroke="#2C2C2E"
+              strokeWidth="7"
               fill="transparent"
             />
             {activeSession && activeSession.mode === 'countdown' && (
               <circle
-                cx="112"
-                cy="112"
-                r="96"
-                stroke="#3B82F6"
-                strokeWidth="6"
-                strokeDasharray={2 * Math.PI * 96}
-                strokeDashoffset={2 * Math.PI * 96 * (1 - progressRatio)}
+                cx="128"
+                cy="128"
+                r="110"
+                stroke="#007AFF"
+                strokeWidth="7"
+                strokeDasharray={2 * Math.PI * 110}
+                strokeDashoffset={2 * Math.PI * 110 * (1 - progressRatio)}
                 strokeLinecap="round"
                 fill="transparent"
                 className="transition-all duration-300"
@@ -350,12 +350,12 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
             )}
             {activeSession && activeSession.mode === 'stopwatch' && (
               <circle
-                cx="112"
-                cy="112"
-                r="96"
-                stroke="#10B981"
-                strokeWidth="6"
-                strokeDasharray="4 8"
+                cx="128"
+                cy="128"
+                r="110"
+                stroke="#34C759"
+                strokeWidth="7"
+                strokeDasharray="6 10"
                 fill="transparent"
                 className="animate-spin"
                 style={{ animationDuration: '24s' }}
@@ -364,69 +364,69 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
           </svg>
 
           <div className="absolute flex flex-col items-center justify-center text-center">
-            <span className="font-mono text-4xl font-extrabold tracking-tight text-white tabular-nums">
+            <span className="font-mono text-5xl font-light tracking-tight text-white tabular-nums">
               {activeSession ? formatTime(displaySeconds) : `${targetMinutes}:00`}
             </span>
-            <span className="text-[11px] text-slate-400 mt-1 font-medium">
-              {activeSession ? (isPaused ? '暂停不计入有效时长' : '+1 EXP / 分钟') : '保持专注'}
+            <span className="text-xs text-[#8E8E93] mt-2 font-medium">
+              {activeSession ? (isPaused ? '暂停中 · 扣除暂停时长' : '+1 专注值 / 分钟') : '保持专注 · 离线计时'}
             </span>
           </div>
         </div>
 
         {/* Controls */}
         {activeSession ? (
-          <div className="flex items-center gap-2.5 w-full mt-3">
+          <div className="flex items-center gap-3 w-full mt-4">
             {isPaused ? (
               <button
                 onClick={handleResume}
-                className="flex-1 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-400 active:scale-95 text-white font-semibold text-xs shadow-md transition-all flex items-center justify-center gap-1.5"
+                className="flex-1 h-14 rounded-full bg-[#007AFF] hover:bg-blue-400 active:scale-95 text-white font-semibold text-base shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2"
               >
-                <Play className="w-3.5 h-3.5 fill-current" />
+                <Play className="w-5 h-5 fill-current" />
                 继续
               </button>
             ) : (
               <button
                 onClick={handlePause}
-                className="flex-1 py-2.5 rounded-xl bg-dark-700 hover:bg-dark-600 active:scale-95 text-slate-200 font-semibold text-xs border border-white/[0.08] transition-all flex items-center justify-center gap-1.5"
+                className="flex-1 h-14 rounded-full bg-[#2C2C2E] hover:bg-[#3A3A3C] active:scale-95 text-white font-semibold text-base border border-white/10 transition-all flex items-center justify-center gap-2"
               >
-                <Pause className="w-3.5 h-3.5 fill-current" />
+                <Pause className="w-5 h-5 fill-current" />
                 暂停
               </button>
             )}
 
             <button
               onClick={handleEndSession}
-              className="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-semibold text-xs transition-all flex items-center justify-center gap-1"
+              className="h-14 px-6 rounded-full bg-[#34C759] hover:bg-emerald-400 active:scale-95 text-white font-semibold text-base shadow-lg shadow-green-500/25 transition-all flex items-center justify-center gap-1.5"
             >
-              <CheckCircle className="w-3.5 h-3.5" />
+              <CheckCircle className="w-5 h-5" />
               完成
             </button>
 
             <button
               onClick={handleAbandon}
-              className="p-2.5 rounded-xl bg-dark-700/60 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 border border-white/[0.05] active:scale-95"
+              className="w-14 h-14 rounded-full bg-[#2C2C2E] hover:bg-rose-950/40 text-[#8E8E93] hover:text-rose-400 border border-white/10 active:scale-95 flex items-center justify-center"
               title="放弃本次专注"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw className="w-5 h-5" />
             </button>
           </div>
         ) : (
-          <div className="w-full space-y-3 mt-2">
-            {/* Minimalist Segmented Duration Picker */}
-            <div className="flex items-center p-1 rounded-xl bg-dark-900/80 border border-white/[0.06]">
+          <div className="w-full space-y-4 mt-3">
+            {/* iOS Segmented Duration Picker */}
+            <div className="flex items-center p-1.5 rounded-2xl bg-[#2C2C2E] border border-white/[0.06]">
               {isRecovery && (
                 <button
                   onClick={() => {
                     setTimerMode('countdown');
                     setTargetMinutes(10);
                   }}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  className={`flex-1 h-10 rounded-xl text-sm font-semibold transition-all ${
                     timerMode === 'countdown' && targetMinutes === 10
                       ? 'bg-emerald-500 text-white shadow-sm'
                       : 'text-emerald-400/80 hover:text-emerald-300'
                   }`}
                 >
-                  10m
+                  10分
                 </button>
               )}
               {[15, 25, 45].map((mins) => (
@@ -436,21 +436,21 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
                     setTimerMode('countdown');
                     setTargetMinutes(mins);
                   }}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  className={`flex-1 h-10 rounded-xl text-sm font-semibold transition-all ${
                     timerMode === 'countdown' && targetMinutes === mins
-                      ? 'bg-blue-500 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-[#007AFF] text-white shadow-sm'
+                      : 'text-[#8E8E93] hover:text-white'
                   }`}
                 >
-                  {mins}m
+                  {mins}分
                 </button>
               ))}
               <button
                 onClick={() => setTimerMode('stopwatch')}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex-1 h-10 rounded-xl text-sm font-semibold transition-all ${
                   timerMode === 'stopwatch'
                     ? 'bg-emerald-500 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    : 'text-[#8E8E93] hover:text-white'
                 }`}
               >
                 心流
@@ -459,71 +459,71 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
 
             <button
               onClick={() => handleStart(timerMode, targetMinutes)}
-              className="w-full py-3 rounded-xl bg-blue-500 hover:bg-blue-400 active:scale-95 text-white font-bold text-sm shadow-md shadow-blue-500/25 flex items-center justify-center gap-1.5 transition-all"
+              className="w-full h-14 rounded-2xl bg-[#007AFF] hover:bg-blue-400 active:scale-95 text-white font-bold text-base shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 transition-all"
             >
-              <Play className="w-4 h-4 fill-current" />
+              <Play className="w-5 h-5 fill-current" />
               开启专注
             </button>
           </div>
         )}
       </div>
 
-      {/* Streamlined White Noise Selector */}
-      <div className="p-3.5 rounded-2xl bg-dark-800/60 border border-white/[0.07] space-y-2.5">
+      {/* Streamlined White Noise Card */}
+      <div className="p-6 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] space-y-4 shadow-sm">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
-            <Volume2 className="w-3.5 h-3.5 text-blue-400" />
-            <span>白噪音</span>
+          <div className="flex items-center gap-2 text-base font-bold text-white">
+            <Volume2 className="w-5 h-5 text-blue-400" />
+            <span>环境白噪音</span>
           </div>
-          <span className="text-[10px] text-slate-500">离线合成 · 免流量</span>
+          <span className="text-xs text-[#8E8E93]">本地合成 · 离线可用</span>
         </div>
 
-        <div className="grid grid-cols-4 gap-1.5">
+        <div className="grid grid-cols-4 gap-2">
           <button
             onClick={() => toggleSound('none')}
-            className={`py-1.5 rounded-lg text-xs font-medium border transition-all ${
+            className={`h-12 rounded-2xl text-sm font-semibold border transition-all ${
               soundType === 'none'
-                ? 'bg-dark-700 text-white border-white/[0.15]'
-                : 'bg-dark-900/40 text-slate-400 border-transparent hover:text-slate-200'
+                ? 'bg-[#2C2C2E] text-white border-white/20 shadow-sm'
+                : 'bg-[#2C2C2E]/50 text-[#8E8E93] border-transparent hover:text-slate-200'
             }`}
           >
             静音
           </button>
           <button
             onClick={() => toggleSound('rain')}
-            className={`py-1.5 rounded-lg text-xs font-medium border flex items-center justify-center gap-1 transition-all ${
+            className={`h-12 rounded-2xl text-sm font-semibold border flex items-center justify-center gap-1.5 transition-all ${
               soundType === 'rain'
-                ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
-                : 'bg-dark-900/40 text-slate-400 border-transparent hover:text-slate-200'
+                ? 'bg-blue-500/25 text-blue-300 border-blue-500/40 shadow-sm'
+                : 'bg-[#2C2C2E]/50 text-[#8E8E93] border-transparent hover:text-slate-200'
             }`}
           >
-            <CloudRain className="w-3 h-3" /> 雨声
+            <CloudRain className="w-4 h-4" /> 雨声
           </button>
           <button
             onClick={() => toggleSound('brown')}
-            className={`py-1.5 rounded-lg text-xs font-medium border flex items-center justify-center gap-1 transition-all ${
+            className={`h-12 rounded-2xl text-sm font-semibold border flex items-center justify-center gap-1.5 transition-all ${
               soundType === 'brown'
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                : 'bg-dark-900/40 text-slate-400 border-transparent hover:text-slate-200'
+                ? 'bg-amber-500/25 text-amber-300 border-amber-500/40 shadow-sm'
+                : 'bg-[#2C2C2E]/50 text-[#8E8E93] border-transparent hover:text-slate-200'
             }`}
           >
-            <Radio className="w-3 h-3" /> 棕噪
+            <Radio className="w-4 h-4" /> 棕噪
           </button>
           <button
             onClick={() => toggleSound('pink')}
-            className={`py-1.5 rounded-lg text-xs font-medium border flex items-center justify-center gap-1 transition-all ${
+            className={`h-12 rounded-2xl text-sm font-semibold border flex items-center justify-center gap-1.5 transition-all ${
               soundType === 'pink'
-                ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                : 'bg-dark-900/40 text-slate-400 border-transparent hover:text-slate-200'
+                ? 'bg-rose-500/25 text-rose-300 border-rose-500/40 shadow-sm'
+                : 'bg-[#2C2C2E]/50 text-[#8E8E93] border-transparent hover:text-slate-200'
             }`}
           >
-            <Flame className="w-3 h-3" /> 粉噪
+            <Flame className="w-4 h-4" /> 粉噪
           </button>
         </div>
 
         {soundType !== 'none' && (
-          <div className="flex items-center gap-2 pt-1">
-            <VolumeX className="w-3 h-3 text-slate-500" />
+          <div className="flex items-center gap-3 pt-2">
+            <VolumeX className="w-4 h-4 text-[#8E8E93]" />
             <input
               type="range"
               min="0"
@@ -535,40 +535,41 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
                 setSoundVolume(vol);
                 soundSynthesizer.setVolume(vol);
               }}
-              className="flex-1 accent-blue-500 h-1 bg-dark-700 rounded-lg cursor-pointer"
+              className="flex-1 accent-blue-500 h-1.5 bg-[#2C2C2E] rounded-lg cursor-pointer"
             />
-            <Volume2 className="w-3 h-3 text-blue-400" />
+            <Volume2 className="w-4 h-4 text-blue-400" />
           </div>
         )}
       </div>
 
       {/* Settle Modal */}
       {settlementData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="w-full max-w-sm bg-dark-800 border border-white/[0.1] rounded-3xl p-5 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-5 animate-fade-in">
+          <div className="w-full max-w-sm bg-[#1C1C1E] border border-white/10 rounded-3xl p-6 shadow-2xl space-y-5">
             <div className="text-center">
-              <span className="inline-flex p-2.5 rounded-full bg-blue-500/15 text-blue-400 mb-2">
-                <CheckCircle className="w-6 h-6" />
+              <span className="inline-flex p-3 rounded-full bg-blue-500/15 text-blue-400 mb-2">
+                <CheckCircle className="w-8 h-8" />
               </span>
-              <h3 className="text-base font-bold text-white">专注结算</h3>
+              <h3 className="text-xl font-bold text-white">专注结算</h3>
+              <p className="text-xs text-[#8E8E93] mt-1">恭喜完成一段深度心流！</p>
             </div>
 
-            <div className="space-y-2 bg-dark-900/60 rounded-xl p-3 border border-white/[0.05] text-xs">
-              <div className="flex justify-between py-0.5">
-                <span className="text-slate-400">有效时长</span>
+            <div className="space-y-3 bg-[#2C2C2E]/70 rounded-2xl p-4 border border-white/[0.06] text-sm">
+              <div className="flex justify-between py-1">
+                <span className="text-[#8E8E93]">有效专注</span>
                 <span className="text-white font-mono font-bold">
                   {Math.floor(settlementData.effectiveSeconds / 60)} 分钟
                 </span>
               </div>
-              <div className="flex justify-between py-0.5">
-                <span className="text-slate-400">暂停时长</span>
-                <span className="text-slate-400 font-mono">
+              <div className="flex justify-between py-1">
+                <span className="text-[#8E8E93]">中途暂停</span>
+                <span className="text-[#8E8E93] font-mono">
                   {Math.floor(settlementData.pausedSeconds / 60)} 分钟
                 </span>
               </div>
-              <div className="flex justify-between py-1 border-t border-white/[0.06] items-center">
-                <span className="text-slate-300 font-medium">获得 Focus EXP</span>
-                <span className="text-blue-400 font-mono font-bold text-sm">
+              <div className="flex justify-between py-2 border-t border-white/[0.08] items-center">
+                <span className="text-slate-200 font-semibold">获得专注经验</span>
+                <span className="text-blue-400 font-mono font-bold text-base">
                   +{settlementData.earnedExp} EXP
                 </span>
               </div>
@@ -576,7 +577,7 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
 
             <button
               onClick={handleConfirmSettlement}
-              className="w-full py-2.5 rounded-xl bg-blue-500 hover:bg-blue-400 active:scale-95 text-white font-bold text-xs shadow-md transition-all"
+              className="w-full h-13 rounded-2xl bg-[#007AFF] hover:bg-blue-400 active:scale-95 text-white font-bold text-sm shadow-lg shadow-blue-500/25 transition-all"
             >
               确认入账
             </button>
@@ -586,45 +587,45 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
 
       {/* Sedentary Awakening Modal */}
       {showMicroMovement && selectedMovement && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="w-full max-w-sm bg-dark-800 border border-emerald-500/30 rounded-3xl p-5 shadow-2xl space-y-3.5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-5 animate-fade-in">
+          <div className="w-full max-w-sm bg-[#1C1C1E] border border-emerald-500/30 rounded-3xl p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <Activity className="w-4 h-4 text-emerald-400" />
-                <h3 className="text-sm font-bold text-white">久坐唤醒</h3>
+              <div className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-base font-bold text-white">久坐放松建议</h3>
               </div>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400">
-                {selectedMovement.category === 'desk' ? '工位动作' : '离座活动'}
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-medium">
+                {selectedMovement.category === 'desk' ? '工位伸展' : '离座活动'}
               </span>
             </div>
 
-            <div className="p-3 rounded-xl bg-dark-900/60 border border-white/[0.05]">
-              <div className="flex items-baseline justify-between mb-1">
-                <h4 className="text-xs font-bold text-emerald-300">{selectedMovement.name}</h4>
-                <span className="text-[10px] text-slate-400 font-mono">~{selectedMovement.durationSeconds}s</span>
+            <div className="p-4 rounded-2xl bg-[#2C2C2E]/70 border border-white/[0.06]">
+              <div className="flex items-baseline justify-between mb-1.5">
+                <h4 className="text-sm font-bold text-emerald-300">{selectedMovement.name}</h4>
+                <span className="text-xs text-[#8E8E93] font-mono">约 {selectedMovement.durationSeconds} 秒</span>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className="text-sm text-slate-200 leading-relaxed">
                 {selectedMovement.description}
               </p>
             </div>
 
             {movementDone ? (
-              <div className="p-2.5 rounded-xl bg-emerald-950/60 text-center text-xs text-emerald-300 font-medium">
-                ✓ 已完成碎片活动记录
+              <div className="p-3 rounded-2xl bg-emerald-950/60 text-center text-sm text-emerald-300 font-medium">
+                ✓ 已完成微活动放松
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <button
                   onClick={handleCompleteMicroMovement}
-                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-sm transition-all active:scale-95"
+                  className="flex-1 h-12 rounded-2xl bg-[#34C759] hover:bg-emerald-400 text-white font-semibold text-sm shadow-sm transition-all active:scale-95"
                 >
-                  已完成
+                  已做完 (+5 活力)
                 </button>
                 <button
                   onClick={() => setShowMicroMovement(false)}
-                  className="py-2.5 px-3 rounded-xl bg-dark-700 text-slate-400 text-xs"
+                  className="h-12 px-4 rounded-2xl bg-[#2C2C2E] text-[#8E8E93] text-sm hover:text-white"
                 >
-                  稍后
+                  稍后再做
                 </button>
               </div>
             )}

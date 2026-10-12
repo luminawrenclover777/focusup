@@ -29,8 +29,8 @@ export const Navigation: React.FC<NavigationProps> = ({
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-dark-900/85 backdrop-blur-xl border-t border-white/[0.06] pb-safe-bottom">
-      <div className="flex items-center justify-around h-13 max-w-md mx-auto px-3">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-2xl border-t border-white/[0.08] pb-safe-bottom">
+      <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-4">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
@@ -38,23 +38,24 @@ export const Navigation: React.FC<NavigationProps> = ({
             <button
               key={tab.key}
               onClick={() => onSelectTab(tab.key)}
-              className={`relative flex flex-col items-center justify-center flex-1 py-1.5 transition-all active:scale-90 ${
-                isActive ? 'text-white' : 'text-slate-400 hover:text-slate-200'
+              className={`relative flex flex-col items-center justify-center flex-1 py-1.5 transition-all active:scale-95 ${
+                isActive ? 'text-white' : 'text-[#8E8E93] hover:text-slate-300'
               }`}
             >
               <div className="relative">
                 <Icon
-                  className={`w-5 h-5 transition-transform duration-200 ${
-                    isActive ? 'scale-105 ' + (tab.color || 'text-white') : 'text-slate-400'
+                  className={`w-6 h-6 transition-all duration-200 ${
+                    isActive ? (tab.color || 'text-white') : 'text-[#8E8E93]'
                   }`}
+                  strokeWidth={isActive ? 2.3 : 1.8}
                 />
                 {tab.badge && (
-                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse ring-2 ring-black"></span>
                 )}
               </div>
               <span
-                className={`text-[10px] mt-0.5 font-medium transition-colors ${
-                  isActive ? (tab.color || 'text-white font-semibold') : 'text-slate-400'
+                className={`text-[11px] mt-1 tracking-tight transition-colors ${
+                  isActive ? (tab.color || 'text-white font-semibold') : 'text-[#8E8E93] font-medium'
                 }`}
               >
                 {tab.label}

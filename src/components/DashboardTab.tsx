@@ -178,52 +178,58 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ stats, refreshData }
   };
 
   return (
-    <div className="space-y-3.5 px-4 py-3 max-w-md mx-auto">
+    <div className="space-y-6 px-5 py-4 max-w-lg mx-auto pb-28">
+      {/* Header */}
+      <div>
+        <h2 className="text-2xl font-bold text-white tracking-tight">成长看板</h2>
+        <p className="text-xs text-[#8E8E93] mt-1">累积自律数据 · 见证自我蜕变</p>
+      </div>
+
       {/* 3D Growth Breakdown Card */}
-      <div className="p-4 rounded-2xl bg-dark-800/80 border border-white/[0.08] space-y-3">
+      <div className="p-6 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] space-y-4 shadow-sm">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-white">
-            <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+          <div className="flex items-center gap-2 text-base font-bold text-white">
+            <Sparkles className="w-5 h-5 text-blue-400" />
             <span>三维成长进度</span>
           </div>
-          <span className="text-[11px] font-mono text-slate-400">总计 {stats.totalExp} EXP</span>
+          <span className="text-xs font-mono font-semibold text-[#8E8E93]">总计 {stats.totalExp} EXP</span>
         </div>
 
         {/* Focus */}
-        <div className="space-y-1">
-          <div className="flex justify-between text-[11px]">
-            <span className="text-blue-400 font-medium">Focus Lv.{stats.focus.level}</span>
-            <span className="text-slate-400 font-mono">{stats.focus.levelExp}/{stats.focus.nextLevelExp} EXP</span>
+        <div className="space-y-1.5">
+          <div className="flex justify-between text-xs font-semibold">
+            <span className="text-blue-400">专注 Focus · Lv.{stats.focus.level}</span>
+            <span className="text-[#8E8E93] font-mono">{stats.focus.levelExp} / {stats.focus.nextLevelExp} EXP</span>
           </div>
-          <div className="w-full h-1.5 rounded-full bg-dark-900 overflow-hidden">
+          <div className="w-full h-2.5 rounded-full bg-[#2C2C2E] overflow-hidden">
             <div
-              className="h-full bg-blue-500 rounded-full transition-all duration-500"
+              className="h-full bg-[#007AFF] rounded-full transition-all duration-500"
               style={{ width: `${(stats.focus.levelExp / stats.focus.nextLevelExp) * 100}%` }}
             />
           </div>
         </div>
 
         {/* Body */}
-        <div className="space-y-1">
-          <div className="flex justify-between text-[11px]">
-            <span className="text-emerald-400 font-medium">Body Lv.{stats.body.level}</span>
-            <span className="text-slate-400 font-mono">{stats.body.levelExp}/{stats.body.nextLevelExp} EXP</span>
+        <div className="space-y-1.5">
+          <div className="flex justify-between text-xs font-semibold">
+            <span className="text-emerald-400">活力 Body · Lv.{stats.body.level}</span>
+            <span className="text-[#8E8E93] font-mono">{stats.body.levelExp} / {stats.body.nextLevelExp} EXP</span>
           </div>
-          <div className="w-full h-1.5 rounded-full bg-dark-900 overflow-hidden">
+          <div className="w-full h-2.5 rounded-full bg-[#2C2C2E] overflow-hidden">
             <div
-              className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+              className="h-full bg-[#34C759] rounded-full transition-all duration-500"
               style={{ width: `${(stats.body.levelExp / stats.body.nextLevelExp) * 100}%` }}
             />
           </div>
         </div>
 
         {/* Voice */}
-        <div className="space-y-1">
-          <div className="flex justify-between text-[11px]">
-            <span className="text-amber-400 font-medium">Voice Lv.{stats.voice.level}</span>
-            <span className="text-slate-400 font-mono">{stats.voice.levelExp}/{stats.voice.nextLevelExp} EXP</span>
+        <div className="space-y-1.5">
+          <div className="flex justify-between text-xs font-semibold">
+            <span className="text-amber-400">表达 Voice · Lv.{stats.voice.level}</span>
+            <span className="text-[#8E8E93] font-mono">{stats.voice.levelExp} / {stats.voice.nextLevelExp} EXP</span>
           </div>
-          <div className="w-full h-1.5 rounded-full bg-dark-900 overflow-hidden">
+          <div className="w-full h-2.5 rounded-full bg-[#2C2C2E] overflow-hidden">
             <div
               className="h-full bg-amber-500 rounded-full transition-all duration-500"
               style={{ width: `${(stats.voice.levelExp / stats.voice.nextLevelExp) * 100}%` }}
@@ -232,104 +238,102 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ stats, refreshData }
         </div>
       </div>
 
-      {/* 12-Week Heatmap */}
-      <div className="p-3.5 rounded-2xl bg-dark-800/70 border border-white/[0.07] space-y-2">
-        <div className="flex items-center justify-between text-xs font-semibold text-slate-300">
-          <div className="flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-emerald-400" />
-            <span>12 周行动热力</span>
+      {/* 2x2 Metric Grid */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="p-5 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] shadow-sm">
+          <span className="text-xs text-[#8E8E93] font-medium block">累计有效专注</span>
+          <div className="flex items-baseline gap-1 mt-1">
+            <span className="text-2xl font-bold font-mono text-white">{summary.effectiveFocusMinutes}</span>
+            <span className="text-xs text-[#8E8E93]">分钟</span>
           </div>
-          <div className="flex items-center gap-1 text-[9px] text-slate-500">
+        </div>
+
+        <div className="p-5 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] shadow-sm">
+          <span className="text-xs text-[#8E8E93] font-medium block">抵御 & 刹车</span>
+          <div className="flex items-baseline gap-1 mt-1">
+            <span className="text-2xl font-bold font-mono text-blue-400">{summary.interceptCount + summary.stopLossCount}</span>
+            <span className="text-xs text-[#8E8E93]">次夺回</span>
+          </div>
+        </div>
+
+        <div className="p-5 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] shadow-sm">
+          <span className="text-xs text-[#8E8E93] font-medium block">抢回无意义时间</span>
+          <div className="flex items-baseline gap-1 mt-1">
+            <span className="text-2xl font-bold font-mono text-amber-400">~{summary.estimatedMinutesSaved}</span>
+            <span className="text-xs text-[#8E8E93]">分钟</span>
+          </div>
+        </div>
+
+        <div className="p-5 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] shadow-sm">
+          <span className="text-xs text-[#8E8E93] font-medium block">表达 & 训练打卡</span>
+          <div className="flex items-baseline gap-1 mt-1">
+            <span className="text-2xl font-bold font-mono text-emerald-400">{summary.expressionCount + summary.workoutCount}</span>
+            <span className="text-xs text-[#8E8E93]">项记录</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Ticket Wallet Card */}
+      <div className="p-6 rounded-3xl bg-[#1C1C1E] border border-amber-500/25 space-y-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-base font-bold text-white">
+            <Ticket className="w-5 h-5 text-amber-400" />
+            <span>娱乐券赏金钱包</span>
+          </div>
+          <span className="text-base font-mono font-bold text-amber-400">
+            {ticketData.balance} 张可用
+          </span>
+        </div>
+
+        <p className="text-xs text-[#8E8E93] leading-relaxed">
+          每累计 150 EXP 自动发放 1 张娱乐券（可兑换 30 分钟无负罪感娱乐时间）。
+        </p>
+
+        <button
+          onClick={() => setConfirmUseTicketOpen(true)}
+          disabled={ticketData.balance < 1}
+          className="w-full h-13 rounded-2xl bg-amber-500 hover:bg-amber-400 active:scale-95 disabled:opacity-40 text-black font-bold text-sm shadow-md shadow-amber-500/20 transition-all flex items-center justify-center gap-2"
+        >
+          <Ticket className="w-4 h-4" />
+          兑换 1 张娱乐券（30 分钟无负担放松）
+        </button>
+      </div>
+
+      {/* 12-Week Heatmap */}
+      <div className="p-6 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] space-y-3 shadow-sm">
+        <div className="flex items-center justify-between text-xs font-semibold text-slate-200">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-emerald-400" />
+            <span className="text-sm font-bold text-white">12 周行动热力</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-[10px] text-[#8E8E93]">
             <span>少</span>
-            <span className="w-2 h-2 rounded-sm bg-dark-900 inline-block border border-white/[0.05]"></span>
-            <span className="w-2 h-2 rounded-sm bg-emerald-900 inline-block"></span>
-            <span className="w-2 h-2 rounded-sm bg-emerald-500 inline-block"></span>
+            <span className="w-2.5 h-2.5 rounded-sm bg-[#2C2C2E] inline-block border border-white/[0.05]"></span>
+            <span className="w-2.5 h-2.5 rounded-sm bg-emerald-900 inline-block"></span>
+            <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500 inline-block"></span>
             <span>多</span>
           </div>
         </div>
         {renderHeatmap()}
       </div>
 
-      {/* 2x2 Metric Grid */}
-      <div className="grid grid-cols-2 gap-2">
-        <div className="p-3 rounded-xl bg-dark-800/60 border border-white/[0.06]">
-          <span className="text-[10px] text-slate-500 font-medium">有效专注</span>
-          <div className="flex items-baseline gap-1 mt-0.5">
-            <span className="text-lg font-bold font-mono text-white">{summary.effectiveFocusMinutes}</span>
-            <span className="text-[10px] text-slate-400">分钟</span>
-          </div>
-        </div>
-
-        <div className="p-3 rounded-xl bg-dark-800/60 border border-white/[0.06]">
-          <span className="text-[10px] text-slate-500 font-medium">截胡 & 止损</span>
-          <div className="flex items-baseline gap-1 mt-0.5">
-            <span className="text-lg font-bold font-mono text-blue-400">{summary.interceptCount + summary.stopLossCount}</span>
-            <span className="text-[10px] text-slate-400">次</span>
-          </div>
-        </div>
-
-        <div className="p-3 rounded-xl bg-dark-800/60 border border-white/[0.06]">
-          <div className="flex justify-between items-center">
-            <span className="text-[10px] text-slate-500 font-medium">估算抢回时间</span>
-            <span className="text-[8px] text-slate-500">估算</span>
-          </div>
-          <div className="flex items-baseline gap-1 mt-0.5">
-            <span className="text-lg font-bold font-mono text-amber-400">~{summary.estimatedMinutesSaved}</span>
-            <span className="text-[10px] text-slate-400">分钟</span>
-          </div>
-        </div>
-
-        <div className="p-3 rounded-xl bg-dark-800/60 border border-white/[0.06]">
-          <span className="text-[10px] text-slate-500 font-medium">表达 & 训练</span>
-          <div className="flex items-baseline gap-1 mt-0.5">
-            <span className="text-lg font-bold font-mono text-emerald-400">{summary.expressionCount + summary.workoutCount}</span>
-            <span className="text-[10px] text-slate-400">项记录</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Ticket Wallet */}
-      <div className="p-3.5 rounded-2xl bg-dark-800/70 border border-amber-500/20 space-y-2.5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-white">
-            <Ticket className="w-4 h-4 text-amber-400" />
-            <span>娱乐券钱包</span>
-          </div>
-          <span className="text-xs font-mono font-bold text-amber-300">
-            {ticketData.balance} 张可用
-          </span>
-        </div>
-
-        <p className="text-[11px] text-slate-400">
-          每累计 150 EXP 自动发放 1 张（30 分钟无负担娱乐）。
-        </p>
-
-        <button
-          onClick={() => setConfirmUseTicketOpen(true)}
-          disabled={ticketData.balance < 1}
-          className="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 disabled:opacity-40 text-dark-900 font-bold text-xs shadow-sm transition-all"
-        >
-          兑换 1 张娱乐券（30 分钟）
-        </button>
-      </div>
-
       {/* Backup and Restore */}
-      <div className="p-3.5 rounded-2xl bg-dark-800/50 border border-white/[0.06] space-y-2">
-        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
-          <FileText className="w-3.5 h-3.5 text-slate-400" />
+      <div className="p-6 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] space-y-3 shadow-sm">
+        <div className="flex items-center gap-2 text-sm font-bold text-white">
+          <FileText className="w-4 h-4 text-[#8E8E93]" />
           <span>本地数据备份与迁移</span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 pt-0.5">
+        <div className="grid grid-cols-2 gap-3 pt-1">
           <button
             onClick={exportDatabaseToJson}
-            className="py-2 px-2.5 rounded-xl bg-dark-700/80 hover:bg-dark-600 text-slate-200 text-xs font-medium border border-white/[0.06] flex items-center justify-center gap-1"
+            className="h-12 px-4 rounded-2xl bg-[#2C2C2E] hover:bg-[#3A3A3C] text-slate-200 text-xs font-semibold border border-white/[0.08] flex items-center justify-center gap-2 active:scale-95 transition-all"
           >
-            <Download className="w-3.5 h-3.5 text-blue-400" /> 导出备份
+            <Download className="w-4 h-4 text-blue-400" /> 导出 JSON 备份
           </button>
 
-          <label className="py-2 px-2.5 rounded-xl bg-dark-700/80 hover:bg-dark-600 text-slate-200 text-xs font-medium border border-white/[0.06] flex items-center justify-center gap-1 cursor-pointer">
-            <Upload className="w-3.5 h-3.5 text-emerald-400" /> 恢复备份
+          <label className="h-12 px-4 rounded-2xl bg-[#2C2C2E] hover:bg-[#3A3A3C] text-slate-200 text-xs font-semibold border border-white/[0.08] flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-all">
+            <Upload className="w-4 h-4 text-emerald-400" /> 恢复备份
             <input type="file" accept=".json" onChange={handleFileChange} className="hidden" />
           </label>
         </div>
@@ -337,21 +341,21 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ stats, refreshData }
 
       {/* Ticket Modal */}
       {confirmUseTicketOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="w-full max-w-sm bg-dark-800 border border-amber-500/30 rounded-3xl p-5 shadow-2xl space-y-3 text-center">
-            <Ticket className="w-8 h-8 text-amber-400 mx-auto" />
-            <h3 className="text-sm font-bold text-white">兑换 30 分钟自由娱乐？</h3>
-            <p className="text-xs text-slate-400">将扣减 1 张娱乐券，开启心安理得的娱乐时间。</p>
-            <div className="flex items-center gap-2 pt-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-5 animate-fade-in">
+          <div className="w-full max-w-sm bg-[#1C1C1E] border border-amber-500/30 rounded-3xl p-6 shadow-2xl space-y-4 text-center">
+            <Ticket className="w-10 h-10 text-amber-400 mx-auto" />
+            <h3 className="text-lg font-bold text-white">兑换 30 分钟自由娱乐？</h3>
+            <p className="text-xs text-[#8E8E93]">将扣减 1 张娱乐券，开启心安理得的娱乐时间。</p>
+            <div className="flex items-center gap-3 pt-2">
               <button
                 onClick={handleRedeemTicket}
-                className="flex-1 py-2.5 rounded-xl bg-amber-500 text-dark-900 font-bold text-xs"
+                className="flex-1 h-12 rounded-2xl bg-amber-500 text-black font-bold text-sm active:scale-95 shadow-md"
               >
-                确认
+                确认兑换
               </button>
               <button
                 onClick={() => setConfirmUseTicketOpen(false)}
-                className="py-2.5 px-4 rounded-xl bg-dark-700 text-slate-300 text-xs"
+                className="h-12 px-5 rounded-2xl bg-[#2C2C2E] text-slate-300 text-sm hover:text-white"
               >
                 取消
               </button>
@@ -362,29 +366,29 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ stats, refreshData }
 
       {/* Import Modal */}
       {importPreview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="w-full max-w-sm bg-dark-800 border border-rose-500/40 rounded-3xl p-5 shadow-2xl space-y-3">
-            <div className="flex items-center gap-1.5 text-rose-400">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
-              <h3 className="text-sm font-bold text-white">确认替换恢复？</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-5 animate-fade-in">
+          <div className="w-full max-w-sm bg-[#1C1C1E] border border-rose-500/40 rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-2 text-rose-400">
+              <AlertTriangle className="w-5 h-5 shrink-0" />
+              <h3 className="text-base font-bold text-white">确认替换恢复？</h3>
             </div>
             <p className="text-xs text-rose-200/80">此操作将完全覆盖当前设备上的全部数据。</p>
-            <div className="text-[11px] text-slate-300 bg-dark-900/70 p-2.5 rounded-xl space-y-0.5">
+            <div className="text-xs text-slate-300 bg-[#2C2C2E]/70 p-3 rounded-2xl space-y-1">
               <p>备份时间：{importPreview.exportedDate}</p>
               <p>专注会话：{importPreview.counts.focusSessions} 条</p>
               <p>训练记录：{importPreview.counts.workoutSets} 条</p>
               <p>表达练习：{importPreview.counts.expressionLogs} 条</p>
             </div>
-            <div className="flex items-center gap-2 pt-1">
+            <div className="flex items-center gap-3 pt-1">
               <button
                 onClick={handleConfirmImport}
-                className="flex-1 py-2.5 rounded-xl bg-rose-600 text-white font-bold text-xs"
+                className="flex-1 h-12 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm active:scale-95"
               >
                 确认替换
               </button>
               <button
                 onClick={() => { setImportPreview(null); setRawBackupData(null); }}
-                className="py-2.5 px-3 rounded-xl bg-dark-700 text-slate-300 text-xs"
+                className="h-12 px-5 rounded-2xl bg-[#2C2C2E] text-slate-300 text-sm hover:text-white"
               >
                 取消
               </button>
