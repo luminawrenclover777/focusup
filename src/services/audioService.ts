@@ -148,6 +148,50 @@ class SoundSynthesizer {
     this.currentType = 'none';
     this.isPlaying = false;
   }
+
+  public playCyberHaptic(type: 'pulse' | 'chime' | 'purify' = 'pulse') {
+    try {
+      this.initContext();
+      if (!this.ctx) return;
+
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      const vol = Math.max(0.2, this.volume);
+
+      if (type === 'pulse') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(360, now);
+        osc.frequency.exponentialRampToValueAtTime(720, now + 0.08);
+        gain.gain.setValueAtTime(0.25 * vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      } else if (type === 'chime') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.15);
+        gain.gain.setValueAtTime(0.3 * vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else if (type === 'purify') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(261.63, now);
+        osc.frequency.exponentialRampToValueAtTime(1046.5, now + 0.25);
+        gain.gain.setValueAtTime(0.35 * vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      }
+    } catch {
+      // Audio context may be locked until first interaction
+    }
+  }
 }
 
 export const soundSynthesizer = new SoundSynthesizer();

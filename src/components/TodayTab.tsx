@@ -12,6 +12,9 @@ import {
 import type { DailyHabit, EnergyMode, DimensionStats } from '../types';
 import { db, getLocalDate } from '../db';
 import { awardExp, revertExp, EXP_RULES } from '../services/expService';
+import { soundSynthesizer } from '../services/audioService';
+import { CyberAvatar } from './CyberAvatar';
+import { EvolutionModal } from './EvolutionModal';
 
 interface TodayTabProps {
   energyMode: EnergyMode;
@@ -50,6 +53,8 @@ export const TodayTab: React.FC<TodayTabProps> = ({
 }) => {
   const [selectedMinutes, setSelectedMinutes] = useState<number>(energyMode === 'recovery' ? 10 : 25);
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
+  const [showEvolutionModal, setShowEvolutionModal] = useState<boolean>(false);
+  const [avatarMessage, setAvatarMessage] = useState<string | null>(null);
 
   const today = getLocalDate();
   const isRecovery = energyMode === 'recovery';
@@ -65,7 +70,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
     }, 1600);
   };
 
-  // Intercept action
+  // Intercept action (净化信息熵增)
   const handleIntercept = async () => {
     const eventId = `act_int_${Date.now()}`;
     await db.activityEvents.put({
@@ -87,15 +92,17 @@ export const TodayTab: React.FC<TodayTabProps> = ({
     });
 
     if (tx) {
-      showRewardBadge(`+${EXP_RULES.INTERCEPT} 专注值`);
-      setFeedbackMsg(`已抵御诱惑，抢回约 20 分钟注意力时光`);
+      soundSynthesizer.playCyberHaptic('purify');
+      showRewardBadge(`+${EXP_RULES.INTERCEPT} 专注算力`);
+      setAvatarMessage('「神经防火墙已生效！成功拦截多巴胺劫持，注意力主权夺回！」');
+      setFeedbackMsg(`已净化信息熵增，抢回约 20 分钟纯净意识时光`);
     } else {
       setFeedbackMsg('今日抵御诱惑已达上限 5/5');
     }
     refreshData();
   };
 
-  // Stop-loss action
+  // Stop-loss action (紧急切断多巴胺)
   const handleStopLoss = async () => {
     const eventId = `act_sl_${Date.now()}`;
     await db.activityEvents.put({
@@ -116,8 +123,10 @@ export const TodayTab: React.FC<TodayTabProps> = ({
     });
 
     if (tx) {
-      showRewardBadge(`+${EXP_RULES.STOP_LOSS} 专注值`);
-      setFeedbackMsg(`主动刹车成功，掌控权重回手中`);
+      soundSynthesizer.playCyberHaptic('purify');
+      showRewardBadge(`+${EXP_RULES.STOP_LOSS} 专注算力`);
+      setAvatarMessage('「刚才那根插头被你亲手拔掉了。大脑生物主权正在重置！」');
+      setFeedbackMsg(`紧急切断成功，机体主权重新回到你手中`);
     } else {
       setFeedbackMsg('今日主动刹车已达上限 5/5');
     }
@@ -177,27 +186,70 @@ export const TodayTab: React.FC<TodayTabProps> = ({
         </div>
       )}
 
-      {/* 3-Dimension Apple Style Summary Bar */}
-      <button
-        onClick={onNavigateToDashboard}
-        className="w-full flex items-center justify-between p-3.5 px-4 rounded-2xl bg-[#1C1C1E] hover:bg-[#242426] border border-white/[0.08] transition-all active:scale-[0.99] shadow-sm"
-      >
-        <div className="flex items-center gap-4 text-xs font-semibold">
-          <span className="flex items-center gap-1.5 text-slate-200">
-            <span className="w-2 h-2 rounded-full bg-[#0A84FF]" />
-            专注 Lv.{stats.focus.level}
-          </span>
-          <span className="flex items-center gap-1.5 text-slate-200">
-            <span className="w-2 h-2 rounded-full bg-[#30D158]" />
-            活力 Lv.{stats.body.level}
-          </span>
-          <span className="flex items-center gap-1.5 text-slate-200">
-            <span className="w-2 h-2 rounded-full bg-[#FF9F0A]" />
-            表达 Lv.{stats.voice.level}
-          </span>
-        </div>
-        <ArrowRight className="w-4 h-4 text-[#8E8E93]" />
-      </button>
+      {/* Living Cyber Avatar Centerpiece */}
+      <CyberAvatar
+        totalExp={stats.totalExp}
+        focusExp={stats.focus.exp}
+        bodyExp={stats.body.exp}
+        voiceExp={stats.voice.exp}
+        isRecovery={isRecovery}
+        externalMessage={avatarMessage}
+        onOpenEvolutionSheet={() => setShowEvolutionModal(true)}
+      />
+
+      {/* Triad Energy Battery Gauges */}
+      <div className="grid grid-cols-3 gap-2">
+        <button
+          onClick={onNavigateToDashboard}
+          className="p-3 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] text-left hover:bg-[#242426] transition-all cursor-pointer shadow-sm active:scale-[0.98]"
+        >
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] text-[#8E8E93] font-medium">意识算力</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#0A84FF] shadow-sm shadow-blue-500/50" />
+          </div>
+          <div className="font-mono text-sm font-bold text-white mb-1.5">Lv.{stats.focus.level}</div>
+          <div className="w-full h-1 bg-[#2C2C2E] rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#0A84FF] rounded-full"
+              style={{ width: `${Math.min(100, (stats.focus.levelExp / 300) * 100)}%` }}
+            />
+          </div>
+        </button>
+
+        <button
+          onClick={onNavigateToDashboard}
+          className="p-3 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] text-left hover:bg-[#242426] transition-all cursor-pointer shadow-sm active:scale-[0.98]"
+        >
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] text-[#8E8E93] font-medium">动力机体</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#30D158] shadow-sm shadow-green-500/50" />
+          </div>
+          <div className="font-mono text-sm font-bold text-white mb-1.5">Lv.{stats.body.level}</div>
+          <div className="w-full h-1 bg-[#2C2C2E] rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#30D158] rounded-full"
+              style={{ width: `${Math.min(100, (stats.body.levelExp / 300) * 100)}%` }}
+            />
+          </div>
+        </button>
+
+        <button
+          onClick={onNavigateToDashboard}
+          className="p-3 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] text-left hover:bg-[#242426] transition-all cursor-pointer shadow-sm active:scale-[0.98]"
+        >
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] text-[#8E8E93] font-medium">神经音频</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FF9F0A] shadow-sm shadow-orange-500/50" />
+          </div>
+          <div className="font-mono text-sm font-bold text-white mb-1.5">Lv.{stats.voice.level}</div>
+          <div className="w-full h-1 bg-[#2C2C2E] rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#FF9F0A] rounded-full"
+              style={{ width: `${Math.min(100, (stats.voice.levelExp / 300) * 100)}%` }}
+            />
+          </div>
+        </button>
+      </div>
 
       {/* FocusPod Hero Card */}
       <div className="p-6 rounded-3xl bg-gradient-to-b from-[#1C1C1E] to-[#171719] border border-white/10 shadow-lg relative overflow-hidden">
@@ -422,6 +474,13 @@ export const TodayTab: React.FC<TodayTabProps> = ({
           <ArrowRight className="w-3.5 h-3.5 text-[#8E8E93]" />
         </button>
       </div>
+
+      {/* Evolution Milestone Sheet */}
+      <EvolutionModal
+        isOpen={showEvolutionModal}
+        onClose={() => setShowEvolutionModal(false)}
+        totalExp={stats.totalExp}
+      />
     </div>
   );
 };

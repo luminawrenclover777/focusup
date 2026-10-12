@@ -249,6 +249,7 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
     const { session, effectiveSeconds, earnedExp, recommendedMovement, movementCompleted } = settlementData;
 
     if (earnedExp > 0) {
+      soundSynthesizer.playCyberHaptic('chime');
       await awardExp({
         dimension: 'focus',
         amount: earnedExp,
@@ -384,7 +385,7 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
               {activeSession ? formatTime(displaySeconds) : `${targetMinutes}:00`}
             </span>
             <span className="text-[11px] text-[#8E8E93] mt-2 font-medium">
-              {activeSession ? (isPaused ? '暂停中 · 自动扣除暂停时间' : '+1 专注值 / 分钟') : '保持专注 · 离线精确校准'}
+              {activeSession ? (isPaused ? '核心待机中 · 自动扣除暂停时间' : '⚡ 意识超频提纯中 · +1 算力 / 分钟') : '保持专注 · 为机体注入纯净能量'}
             </span>
           </div>
         </div>
@@ -573,10 +574,10 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
             {/* Header */}
             <div className="text-center relative z-10">
               <span className="inline-flex p-3 rounded-full bg-[#0A84FF]/15 text-[#0A84FF] mb-2 border border-[#0A84FF]/25 shadow-sm">
-                <CheckCircle className="w-7 h-7" />
+                <Sparkles className="w-7 h-7" />
               </span>
-              <h3 className="text-xl font-bold text-white tracking-tight">专注结算</h3>
-              <p className="text-xs text-[#8E8E93] mt-1">恭喜完成一段深度心流时光！</p>
+              <h3 className="text-xl font-bold text-white tracking-tight">算力提纯完成</h3>
+              <p className="text-xs text-[#8E8E93] mt-1">深度心流结束 · 纯净能量已就绪，注入分身核心</p>
             </div>
 
             {/* Hero Stat & EXP Badge */}
@@ -588,18 +589,18 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
                     : settlementData.effectiveSeconds}
                 </span>
                 <span className="text-lg font-medium text-[#8E8E93] ml-1.5">
-                  {settlementData.effectiveSeconds >= 60 ? '分钟专注' : '秒专注'}
+                  {settlementData.effectiveSeconds >= 60 ? '分钟心流' : '秒心流'}
                 </span>
               </div>
 
               <div className="mt-2.5">
                 {settlementData.earnedExp > 0 ? (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0A84FF]/15 border border-[#0A84FF]/30 text-[#0A84FF] text-xs font-semibold">
-                    <Sparkles className="w-3.5 h-3.5" /> +{settlementData.earnedExp} 专注 EXP
+                    <Sparkles className="w-3.5 h-3.5" /> +{settlementData.earnedExp} 意识算力
                   </span>
                 ) : (
                   <span className="text-xs text-[#8E8E93] bg-white/[0.05] px-3 py-1 rounded-full">
-                    专注不足 1 分钟未折算经验
+                    心流不足 1 分钟未折算算力
                   </span>
                 )}
               </div>
@@ -627,7 +628,7 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-1.5">
                     <Activity className="w-3.5 h-3.5 text-[#30D158]" />
-                    <span className="text-xs font-bold text-slate-200">久坐微放松</span>
+                    <span className="text-xs font-bold text-slate-200">机体微舒展</span>
                   </div>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-[#30D158] font-medium border border-emerald-500/20">
                     {settlementData.recommendedMovement.category === 'desk' ? '工位隐蔽' : '离座活动'} · 约 {settlementData.recommendedMovement.durationSeconds}s
@@ -663,8 +664,8 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
                   </span>
                   <span>
                     {settlementData.movementCompleted
-                      ? '微活动已完成 (+5 活力)'
-                      : '顺便做一下微放松 (+5 活力)'}
+                      ? '动力关节已舒展 (+5 活力)'
+                      : '顺便舒展动力关节 (+5 活力)'}
                   </span>
                 </button>
               </div>
@@ -677,10 +678,10 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
                 onClick={handleConfirmSettlement}
                 className="w-full h-14 rounded-2xl bg-[#0A84FF] hover:bg-blue-400 active:scale-[0.98] text-white font-bold text-base shadow-xl shadow-blue-500/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
-                <span>确认入账并继续</span>
+                <span>为机体注入能量并同步</span>
                 {(settlementData.earnedExp > 0 || settlementData.movementCompleted) && (
                   <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-mono font-semibold">
-                    +{settlementData.earnedExp + (settlementData.movementCompleted ? 5 : 0)} EXP
+                    +{settlementData.earnedExp + (settlementData.movementCompleted ? 5 : 0)} 算力
                   </span>
                 )}
               </button>
