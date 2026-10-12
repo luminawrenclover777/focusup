@@ -409,7 +409,7 @@ export const BodyTab: React.FC<BodyTabProps> = ({ refreshData }) => {
           <button
             type="button"
             onClick={handleSaveCustomWorkout}
-            className="w-full h-12 rounded-2xl bg-[#30D158] hover:bg-emerald-400 text-white font-semibold text-sm shadow-md transition-all active:scale-95"
+            className="w-full h-14 rounded-2xl bg-[#30D158] hover:bg-emerald-400 text-white font-bold text-base shadow-xl shadow-green-500/25 transition-all active:scale-[0.98] cursor-pointer"
           >
             保存并打卡 (+25 EXP)
           </button>

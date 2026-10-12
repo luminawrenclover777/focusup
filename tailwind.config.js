@@ -43,6 +43,11 @@ export default {
         'safe-top': 'env(safe-area-inset-top)',
         'safe-bottom': 'env(safe-area-inset-bottom)',
       },
+      spacing: {
+        '13': '3.25rem', // 52px
+        '15': '3.75rem', // 60px
+        '18': '4.5rem',  // 72px
+      },
     },
   },
   plugins: [],

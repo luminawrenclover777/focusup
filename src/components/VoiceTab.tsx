@@ -215,13 +215,13 @@ export const VoiceTab: React.FC<VoiceTabProps> = ({
           <div className="flex items-center gap-3 pt-2">
             <button
               onClick={handleReset}
-              className="flex-1 h-12 rounded-2xl bg-[#FF9F0A] hover:bg-amber-400 text-black font-bold text-xs shadow-md transition-all active:scale-95"
+              className="flex-1 h-14 rounded-2xl bg-[#FF9F0A] hover:bg-amber-400 text-black font-bold text-base shadow-xl shadow-amber-500/25 transition-all active:scale-[0.98] cursor-pointer"
             >
               再来一段
             </button>
             <button
               onClick={() => setShowHistory(true)}
-              className="h-12 px-5 rounded-2xl bg-[#2C2C2E] text-slate-200 font-semibold text-xs hover:text-white"
+              className="h-14 px-6 rounded-2xl bg-[#2C2C2E] hover:bg-[#3A3A3C] text-slate-200 font-semibold text-sm transition-all cursor-pointer"
             >
               查看记录
             </button>
@@ -312,7 +312,7 @@ export const VoiceTab: React.FC<VoiceTabProps> = ({
               {isRecording && (
                 <button
                   onClick={handleToggleRecord}
-                  className="h-11 px-5 rounded-2xl bg-[#30D158] text-white font-semibold text-xs active:scale-95 shadow-md transition-all"
+                  className="h-12 px-6 rounded-2xl bg-[#30D158] hover:bg-emerald-400 text-white font-bold text-sm active:scale-[0.98] shadow-lg shadow-green-500/25 transition-all cursor-pointer"
                 >
                   讲完了，立即完成 (+30 EXP)
                 </button>
@@ -329,7 +329,7 @@ export const VoiceTab: React.FC<VoiceTabProps> = ({
               />
               <button
                 onClick={() => handleSaveExpression()}
-                className="w-full h-12 rounded-2xl bg-[#FF9F0A] hover:bg-amber-400 active:scale-95 text-black font-bold text-xs shadow-lg shadow-amber-500/25 transition-all flex items-center justify-center gap-1.5"
+                className="w-full h-14 rounded-2xl bg-[#FF9F0A] hover:bg-amber-400 active:scale-[0.98] text-black font-bold text-base shadow-xl shadow-amber-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 保存并打卡 (+30 EXP)
               </button>

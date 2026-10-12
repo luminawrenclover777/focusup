@@ -216,10 +216,10 @@ export const TodayTab: React.FC<TodayTabProps> = ({
           </div>
           <button
             onClick={() => onNavigateToFocus(selectedMinutes)}
-            className="flex items-center justify-center w-13 h-13 rounded-full bg-[#0A84FF] hover:bg-blue-400 active:scale-95 text-white shadow-lg shadow-blue-500/25 transition-all cursor-pointer"
+            className="flex items-center justify-center w-14 h-14 rounded-full bg-[#0A84FF] hover:bg-blue-400 active:scale-[0.98] text-white shadow-xl shadow-blue-500/30 transition-all cursor-pointer shrink-0"
             title="开始专注"
           >
-            <Play className="w-5 h-5 ml-0.5 fill-current" />
+            <Play className="w-6 h-6 ml-0.5 fill-current" />
           </button>
         </div>
 
@@ -228,9 +228,9 @@ export const TodayTab: React.FC<TodayTabProps> = ({
           {isRecovery && (
             <button
               onClick={() => setSelectedMinutes(10)}
-              className={`flex-1 h-10 rounded-xl text-xs font-semibold border transition-all ${
+              className={`flex-1 h-11 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                 selectedMinutes === 10
-                  ? 'bg-cyan-500 text-black border-cyan-400 shadow-sm'
+                  ? 'bg-cyan-500 text-black border-cyan-400 shadow-md'
                   : 'bg-[#2C2C2E] text-cyan-400 border-cyan-500/30'
               }`}
             >
@@ -241,9 +241,9 @@ export const TodayTab: React.FC<TodayTabProps> = ({
             <button
               key={mins}
               onClick={() => setSelectedMinutes(mins)}
-              className={`flex-1 h-10 rounded-xl text-xs font-semibold border transition-all ${
+              className={`flex-1 h-11 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                 selectedMinutes === mins
-                  ? 'bg-[#0A84FF] text-white border-blue-400 shadow-sm'
+                  ? 'bg-[#0A84FF] text-white border-blue-400 shadow-md'
                   : 'bg-[#2C2C2E] text-slate-200 border-white/[0.06] hover:bg-[#3A3A3C]'
               }`}
             >
@@ -252,7 +252,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
           ))}
           <button
             onClick={() => onNavigateToFocus(0)}
-            className="flex-1 h-10 rounded-xl text-xs font-semibold border bg-[#2C2C2E] text-slate-300 border-white/[0.06] hover:bg-[#3A3A3C]"
+            className="flex-1 h-11 rounded-xl text-xs font-bold border bg-[#2C2C2E] text-slate-300 border-white/[0.06] hover:bg-[#3A3A3C] transition-all cursor-pointer"
           >
             心流
           </button>

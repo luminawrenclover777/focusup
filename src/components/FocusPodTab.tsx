@@ -395,50 +395,50 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
             {isPaused ? (
               <button
                 onClick={handleResume}
-                className="flex-1 h-13 rounded-2xl bg-[#0A84FF] hover:bg-blue-400 active:scale-95 text-white font-semibold text-sm shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2"
+                className="flex-1 h-14 rounded-2xl bg-[#0A84FF] hover:bg-blue-400 active:scale-[0.98] text-white font-bold text-base shadow-xl shadow-blue-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Play className="w-4 h-4 fill-current" />
+                <Play className="w-5 h-5 fill-current" />
                 继续专注
               </button>
             ) : (
               <button
                 onClick={handlePause}
-                className="flex-1 h-13 rounded-2xl bg-[#2C2C2E] hover:bg-[#3A3A3C] active:scale-95 text-white font-semibold text-sm border border-white/10 transition-all flex items-center justify-center gap-2"
+                className="flex-1 h-14 rounded-2xl bg-[#2C2C2E] hover:bg-[#3A3A3C] active:scale-[0.98] text-white font-bold text-base border border-white/10 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Pause className="w-4 h-4 fill-current" />
+                <Pause className="w-5 h-5 fill-current" />
                 暂停
               </button>
             )}
 
             <button
               onClick={handleEndSession}
-              className="h-13 px-6 rounded-2xl bg-[#30D158] hover:bg-emerald-400 active:scale-95 text-white font-semibold text-sm shadow-lg shadow-green-500/25 transition-all flex items-center justify-center gap-1.5"
+              className="h-14 px-6 rounded-2xl bg-[#30D158] hover:bg-emerald-400 active:scale-[0.98] text-white font-bold text-base shadow-xl shadow-green-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <CheckCircle className="w-4 h-4" />
+              <CheckCircle className="w-5 h-5" />
               完成
             </button>
 
             <button
               onClick={handleAbandon}
-              className="w-13 h-13 rounded-2xl bg-[#2C2C2E] hover:bg-rose-950/40 text-[#8E8E93] hover:text-rose-400 border border-white/10 active:scale-95 flex items-center justify-center transition-colors"
+              className="w-14 h-14 rounded-2xl bg-[#2C2C2E] hover:bg-rose-950/40 text-[#8E8E93] hover:text-rose-400 border border-white/10 active:scale-[0.98] flex items-center justify-center transition-colors cursor-pointer shrink-0"
               title="放弃本次专注"
             >
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="w-5 h-5" />
             </button>
           </div>
         ) : (
-          <div className="w-full space-y-3.5 mt-2 z-10">
+          <div className="w-full space-y-4 mt-3 z-10">
             {/* iOS Segmented Duration Picker */}
-            <div className="flex items-center p-1 rounded-2xl bg-[#2C2C2E] border border-white/[0.06]">
+            <div className="flex items-center p-1.5 rounded-2xl bg-[#2C2C2E]/80 border border-white/[0.08] shadow-inner gap-1">
               {isRecovery && (
                 <button
                   onClick={() => {
                     setTimerMode('countdown');
                     setTargetMinutes(10);
                   }}
-                  className={`flex-1 h-9 rounded-xl text-xs font-semibold transition-all ${
+                  className={`flex-1 h-10 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     timerMode === 'countdown' && targetMinutes === 10
-                      ? 'bg-cyan-500 text-black shadow-sm'
+                      ? 'bg-cyan-500 text-black shadow-md'
                       : 'text-cyan-400/80 hover:text-cyan-300'
                   }`}
                 >
@@ -452,9 +452,9 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
                     setTimerMode('countdown');
                     setTargetMinutes(mins);
                   }}
-                  className={`flex-1 h-9 rounded-xl text-xs font-semibold transition-all ${
+                  className={`flex-1 h-10 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     timerMode === 'countdown' && targetMinutes === mins
-                      ? 'bg-[#0A84FF] text-white shadow-sm'
+                      ? 'bg-[#0A84FF] text-white shadow-md'
                       : 'text-[#8E8E93] hover:text-white'
                   }`}
                 >
@@ -463,9 +463,9 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
               ))}
               <button
                 onClick={() => setTimerMode('stopwatch')}
-                className={`flex-1 h-9 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex-1 h-10 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   timerMode === 'stopwatch'
-                    ? 'bg-[#30D158] text-white shadow-sm'
+                    ? 'bg-[#30D158] text-white shadow-md'
                     : 'text-[#8E8E93] hover:text-white'
                 }`}
               >
@@ -475,10 +475,13 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
 
             <button
               onClick={() => handleStart(timerMode, targetMinutes)}
-              className="w-full h-13 rounded-2xl bg-[#0A84FF] hover:bg-blue-400 active:scale-95 text-white font-bold text-sm shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
+              className="w-full h-14 rounded-2xl bg-[#0A84FF] hover:bg-blue-400 active:scale-[0.98] text-white font-bold text-base shadow-xl shadow-blue-500/30 flex items-center justify-center gap-2.5 transition-all cursor-pointer"
             >
-              <Play className="w-4 h-4 fill-current" />
-              开启专注
+              <Play className="w-5 h-5 fill-current" />
+              <span>开启专注</span>
+              <span className="text-xs bg-white/20 px-2.5 py-0.5 rounded-full font-mono font-medium">
+                {timerMode === 'countdown' ? `${targetMinutes} 分钟` : '正向心流'}
+              </span>
             </button>
           </div>
         )}
@@ -497,7 +500,7 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
         <div className="grid grid-cols-4 gap-2">
           <button
             onClick={() => toggleSound('none')}
-            className={`h-11 rounded-2xl text-xs font-semibold border transition-all ${
+            className={`h-12 rounded-2xl text-xs font-semibold border transition-all cursor-pointer ${
               soundType === 'none'
                 ? 'bg-[#2C2C2E] text-white border-white/20 shadow-sm'
                 : 'bg-[#2C2C2E]/40 text-[#8E8E93] border-transparent hover:text-slate-200'
@@ -507,7 +510,7 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
           </button>
           <button
             onClick={() => toggleSound('rain')}
-            className={`h-11 rounded-2xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all ${
+            className={`h-12 rounded-2xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               soundType === 'rain'
                 ? 'bg-blue-500/20 text-blue-300 border-blue-500/40 shadow-sm'
                 : 'bg-[#2C2C2E]/40 text-[#8E8E93] border-transparent hover:text-slate-200'
@@ -517,7 +520,7 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
           </button>
           <button
             onClick={() => toggleSound('brown')}
-            className={`h-11 rounded-2xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all ${
+            className={`h-12 rounded-2xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               soundType === 'brown'
                 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm'
                 : 'bg-[#2C2C2E]/40 text-[#8E8E93] border-transparent hover:text-slate-200'
@@ -527,7 +530,7 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
           </button>
           <button
             onClick={() => toggleSound('pink')}
-            className={`h-11 rounded-2xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all ${
+            className={`h-12 rounded-2xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               soundType === 'pink'
                 ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-sm'
                 : 'bg-[#2C2C2E]/40 text-[#8E8E93] border-transparent hover:text-slate-200'

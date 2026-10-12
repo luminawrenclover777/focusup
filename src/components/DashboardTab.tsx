@@ -317,7 +317,7 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ stats, refreshData }
         <button
           onClick={() => setConfirmUseTicketOpen(true)}
           disabled={ticketData.balance < 1}
-          className="w-full h-12 rounded-2xl bg-[#BF5AF2] hover:bg-purple-400 active:scale-95 disabled:opacity-35 text-white font-bold text-xs shadow-md shadow-purple-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full h-14 rounded-2xl bg-[#BF5AF2] hover:bg-purple-400 active:scale-[0.98] disabled:opacity-35 text-white font-bold text-sm shadow-xl shadow-purple-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
           <Ticket className="w-4 h-4" />
           兑换 1 张娱乐券（30 分钟无负担放松）
@@ -352,12 +352,12 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ stats, refreshData }
         <div className="grid grid-cols-2 gap-3 pt-0.5">
           <button
             onClick={exportDatabaseToJson}
-            className="h-11 px-3.5 rounded-2xl bg-[#2C2C2E] hover:bg-[#3A3A3C] text-slate-200 text-xs font-semibold border border-white/[0.08] flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+            className="h-12 px-3.5 rounded-2xl bg-[#2C2C2E] hover:bg-[#3A3A3C] text-slate-200 text-xs font-semibold border border-white/[0.08] flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-[#0A84FF]" /> 导出备份
           </button>
 
-          <label className="h-11 px-3.5 rounded-2xl bg-[#2C2C2E] hover:bg-[#3A3A3C] text-slate-200 text-xs font-semibold border border-white/[0.08] flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition-all">
+          <label className="h-12 px-3.5 rounded-2xl bg-[#2C2C2E] hover:bg-[#3A3A3C] text-slate-200 text-xs font-semibold border border-white/[0.08] flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition-all">
             <Upload className="w-3.5 h-3.5 text-[#30D158]" /> 恢复备份
             <input type="file" accept=".json" onChange={handleFileChange} className="hidden" />
           </label>
