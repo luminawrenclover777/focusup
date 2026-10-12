@@ -144,12 +144,12 @@ export const VoiceTab: React.FC<VoiceTabProps> = ({
   };
 
   return (
-    <div className="space-y-6 px-5 py-4 max-w-lg mx-auto pb-28">
+    <div className="space-y-5 px-5 py-3.5 max-w-lg mx-auto pb-28">
       {/* Top Bar */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">随心表达</h2>
-          <p className="text-xs text-[#8E8E93] mt-1">倾倒杂念 · 记录灵感 · 找回内心平静</p>
+          <h2 className="text-xl font-bold text-white tracking-tight">随心表达</h2>
+          <p className="text-xs text-[#8E8E93] mt-0.5">倾倒杂念 · 记录灵感 · 找回内心平静</p>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs font-mono text-[#8E8E93] px-3 py-1 rounded-full bg-[#1C1C1E] border border-white/10">
@@ -157,7 +157,7 @@ export const VoiceTab: React.FC<VoiceTabProps> = ({
           </span>
           <button
             onClick={() => setShowHistory(!showHistory)}
-            className="w-10 h-10 rounded-full bg-[#1C1C1E] border border-white/10 text-slate-300 hover:text-white flex items-center justify-center active:scale-95 transition-all shadow-sm"
+            className="w-9 h-9 rounded-full bg-[#1C1C1E] border border-white/10 text-slate-300 hover:text-white flex items-center justify-center active:scale-95 transition-all shadow-sm"
             title="历史表达"
           >
             <History className="w-4 h-4" />
@@ -167,12 +167,12 @@ export const VoiceTab: React.FC<VoiceTabProps> = ({
 
       {showHistory ? (
         /* History View */
-        <div className="space-y-4 animate-fade-in">
+        <div className="space-y-3.5 animate-fade-in">
           <div className="flex items-center justify-between">
-            <span className="text-base font-bold text-white">历史表达回顾</span>
+            <span className="text-sm font-bold text-white">历史表达回顾</span>
             <button
               onClick={() => setShowHistory(false)}
-              className="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1"
+              className="text-xs text-[#FF9F0A] hover:underline font-semibold flex items-center gap-1"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               返回表达
@@ -180,19 +180,19 @@ export const VoiceTab: React.FC<VoiceTabProps> = ({
           </div>
 
           {historyLogs.length === 0 ? (
-            <div className="p-10 text-center bg-[#1C1C1E] rounded-3xl border border-white/[0.08] text-[#8E8E93] text-sm">
+            <div className="p-8 text-center bg-[#1C1C1E] rounded-3xl border border-white/[0.08] text-[#8E8E93] text-xs">
               暂无表达记录，快去倾吐第一段灵感吧！
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {historyLogs.map((item) => (
-                <div key={item.id} className="p-5 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] space-y-2 shadow-sm">
+                <div key={item.id} className="p-4 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1.5 shadow-sm">
                   <div className="flex items-center justify-between text-xs text-[#8E8E93]">
-                    <span className="font-mono">{item.localDate}</span>
-                    <span className="text-amber-400 font-semibold">+30 Voice EXP</span>
+                    <span className="font-mono text-[11px]">{item.localDate}</span>
+                    <span className="text-[#FF9F0A] font-semibold text-[11px]">+30 Voice EXP</span>
                   </div>
-                  <h4 className="text-base font-bold text-white leading-snug">{item.topic}</h4>
-                  <p className="text-sm text-slate-300 pt-1 leading-relaxed bg-[#2C2C2E]/60 p-3.5 rounded-2xl">
+                  <h4 className="text-sm font-bold text-white leading-snug">{item.topic}</h4>
+                  <p className="text-xs text-slate-300 pt-1 leading-relaxed bg-[#2C2C2E]/60 p-3 rounded-xl">
                     {item.slot1 || '口述随笔'}
                   </p>
                 </div>
@@ -202,26 +202,26 @@ export const VoiceTab: React.FC<VoiceTabProps> = ({
         </div>
       ) : step === 'success' ? (
         /* Success State */
-        <div className="p-8 rounded-3xl bg-[#1C1C1E] border border-amber-500/30 text-center space-y-5 animate-fade-in shadow-lg">
-          <span className="inline-flex p-4 rounded-full bg-amber-500/20 text-amber-400">
-            <CheckCircle2 className="w-10 h-10" />
+        <div className="p-7 rounded-3xl bg-[#1C1C1E] border border-orange-500/30 text-center space-y-4 animate-fade-in shadow-lg">
+          <span className="inline-flex p-3 rounded-full bg-orange-500/15 text-[#FF9F0A]">
+            <CheckCircle2 className="w-8 h-8" />
           </span>
           <div>
-            <h3 className="text-2xl font-bold text-white">灵感已收录！</h3>
-            <p className="text-sm text-slate-300 mt-2">
-              恭喜倾倒大脑杂念，已入账 <strong className="text-amber-400 font-bold">+30 Voice EXP</strong>
+            <h3 className="text-xl font-bold text-white">灵感已收录！</h3>
+            <p className="text-xs text-slate-300 mt-1">
+              大脑杂念已倾倒，已入账 <strong className="text-[#FF9F0A] font-bold">+30 Voice EXP</strong>
             </p>
           </div>
           <div className="flex items-center gap-3 pt-2">
             <button
               onClick={handleReset}
-              className="flex-1 h-13 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm shadow-md transition-all active:scale-95"
+              className="flex-1 h-12 rounded-2xl bg-[#FF9F0A] hover:bg-amber-400 text-black font-bold text-xs shadow-md transition-all active:scale-95"
             >
               再来一段
             </button>
             <button
               onClick={() => setShowHistory(true)}
-              className="h-13 px-5 rounded-2xl bg-[#2C2C2E] text-slate-200 font-semibold text-sm hover:text-white"
+              className="h-12 px-5 rounded-2xl bg-[#2C2C2E] text-slate-200 font-semibold text-xs hover:text-white"
             >
               查看记录
             </button>
@@ -229,90 +229,90 @@ export const VoiceTab: React.FC<VoiceTabProps> = ({
         </div>
       ) : (
         /* Main Active Expression Flow */
-        <div className="space-y-5">
+        <div className="space-y-4">
           {/* Inspiration Card */}
-          <div className="p-6 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] shadow-md space-y-3">
+          <div className="p-5 rounded-3xl bg-gradient-to-b from-[#1C1C1E] to-[#171719] border border-orange-500/20 shadow-md space-y-2.5 relative overflow-hidden">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-xs font-bold text-amber-400 tracking-wide">
-                <Sparkles className="w-4 h-4" />
+              <span className="flex items-center gap-1.5 text-xs font-bold text-[#FF9F0A] tracking-wide">
+                <Sparkles className="w-3.5 h-3.5" />
                 灵感启思
               </span>
               <button
                 onClick={handleNextPrompt}
-                className="flex items-center gap-1.5 text-xs text-[#8E8E93] hover:text-white transition-colors"
+                className="flex items-center gap-1 text-[11px] text-[#8E8E93] hover:text-white transition-colors"
                 title="换一个启发"
               >
-                <RotateCw className="w-3.5 h-3.5" />
+                <RotateCw className="w-3 h-3" />
                 换一个
               </button>
             </div>
-            <p className="text-lg font-semibold text-white leading-relaxed">
+            <p className="text-base font-semibold text-white leading-relaxed">
               "{INSPIRATION_PROMPTS[promptIndex]}"
             </p>
           </div>
 
           {/* Mode Switch (Voice vs Note) */}
-          <div className="flex items-center p-1.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08]">
+          <div className="flex items-center p-1 rounded-2xl bg-[#1C1C1E] border border-white/[0.08]">
             <button
               onClick={() => setMode('speak')}
-              className={`flex-1 h-11 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
+              className={`flex-1 h-10 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                 mode === 'speak'
-                  ? 'bg-amber-500 text-black shadow-md'
+                  ? 'bg-[#FF9F0A] text-black shadow-md'
                   : 'text-[#8E8E93] hover:text-white'
               }`}
             >
-              <Mic className="w-4 h-4" />
+              <Mic className="w-3.5 h-3.5" />
               60秒口述随心录
             </button>
             <button
               onClick={() => setMode('write')}
-              className={`flex-1 h-11 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
+              className={`flex-1 h-10 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                 mode === 'write'
-                  ? 'bg-amber-500 text-black shadow-md'
+                  ? 'bg-[#FF9F0A] text-black shadow-md'
                   : 'text-[#8E8E93] hover:text-white'
               }`}
             >
-              <PenTool className="w-4 h-4" />
+              <PenTool className="w-3.5 h-3.5" />
               灵感速写
             </button>
           </div>
 
           {/* Voice Mode Content */}
           {mode === 'speak' ? (
-            <div className="p-8 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] flex flex-col items-center text-center space-y-5 shadow-sm">
-              <div className="relative flex items-center justify-center">
+            <div className="p-7 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] flex flex-col items-center text-center space-y-4 shadow-sm">
+              <div className="relative flex items-center justify-center my-2">
                 {isRecording && (
-                  <span className="absolute w-28 h-28 rounded-full bg-amber-500/20 animate-ping"></span>
+                  <span className="absolute w-24 h-24 rounded-full bg-orange-500/20 animate-ping" />
                 )}
                 <button
                   onClick={handleToggleRecord}
-                  className={`w-24 h-24 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-xl ${
+                  className={`w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-xl ${
                     isRecording
-                      ? 'bg-rose-500 text-white shadow-rose-500/30'
-                      : 'bg-amber-500 hover:bg-amber-400 text-black shadow-amber-500/25'
+                      ? 'bg-[#FF453A] text-white shadow-rose-500/30'
+                      : 'bg-[#FF9F0A] hover:bg-amber-400 text-black shadow-amber-500/25'
                   }`}
                 >
                   {isRecording ? (
-                    <Square className="w-8 h-8 fill-current" />
+                    <Square className="w-6 h-6 fill-current" />
                   ) : (
-                    <Mic className="w-10 h-10" />
+                    <Mic className="w-8 h-8" />
                   )}
                 </button>
               </div>
 
               <div>
-                <span className="text-3xl font-mono font-bold text-white tabular-nums">
+                <span className="text-2xl font-mono font-bold text-white tabular-nums">
                   {isRecording ? `${recordSeconds} / 60 秒` : '点击开启 60 秒倾诉'}
                 </span>
-                <p className="text-xs text-[#8E8E93] mt-2">
-                  {isRecording ? '畅所欲言，倾倒杂念，点击下方按钮随时结束' : '不限内容，不设框架，讲完即打卡'}
+                <p className="text-[11px] text-[#8E8E93] mt-1.5">
+                  {isRecording ? '畅所欲言，倾倒杂念，点击下方随时结束' : '不限内容，不设框架，讲完即打卡'}
                 </p>
               </div>
 
               {isRecording && (
                 <button
                   onClick={handleToggleRecord}
-                  className="h-12 px-6 rounded-2xl bg-[#34C759] text-white font-semibold text-sm active:scale-95 shadow-md"
+                  className="h-11 px-5 rounded-2xl bg-[#30D158] text-white font-semibold text-xs active:scale-95 shadow-md transition-all"
                 >
                   讲完了，立即完成 (+30 EXP)
                 </button>
@@ -320,16 +320,16 @@ export const VoiceTab: React.FC<VoiceTabProps> = ({
             </div>
           ) : (
             /* Write Mode Content */
-            <div className="p-6 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] space-y-4 shadow-sm">
+            <div className="p-5 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] space-y-3.5 shadow-sm">
               <textarea
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}
                 placeholder="在此写下任何随想、感悟、或是刚刚烦扰你的思绪（随便写几句即可）"
-                className="w-full h-36 p-4 rounded-2xl bg-[#2C2C2E] border border-white/[0.06] text-base text-white placeholder-[#8E8E93] focus:outline-none focus:border-amber-500/50 resize-none leading-relaxed"
+                className="w-full h-32 p-3.5 rounded-2xl bg-[#2C2C2E] border border-white/[0.06] text-sm text-white placeholder-[#8E8E93] focus:outline-none focus:border-orange-500/50 resize-none leading-relaxed"
               />
               <button
                 onClick={() => handleSaveExpression()}
-                className="w-full h-14 rounded-2xl bg-amber-500 hover:bg-amber-400 active:scale-95 text-black font-bold text-base shadow-lg shadow-amber-500/25 transition-all flex items-center justify-center gap-2"
+                className="w-full h-12 rounded-2xl bg-[#FF9F0A] hover:bg-amber-400 active:scale-95 text-black font-bold text-xs shadow-lg shadow-amber-500/25 transition-all flex items-center justify-center gap-1.5"
               >
                 保存并打卡 (+30 EXP)
               </button>

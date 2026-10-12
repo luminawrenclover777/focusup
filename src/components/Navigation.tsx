@@ -21,16 +21,15 @@ export const Navigation: React.FC<NavigationProps> = ({
       label: '专注',
       icon: Timer,
       badge: hasActiveSession,
-      color: 'text-blue-400'
     },
-    { key: 'voice' as TabKey, label: '表达', icon: MessageSquare, color: 'text-amber-400' },
-    { key: 'body' as TabKey, label: '训练', icon: Dumbbell, color: 'text-emerald-400' },
+    { key: 'voice' as TabKey, label: '表达', icon: MessageSquare },
+    { key: 'body' as TabKey, label: '训练', icon: Dumbbell },
     { key: 'dashboard' as TabKey, label: '看板', icon: BarChart3 }
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#000000] border-t border-white/[0.08] pb-safe-bottom">
-      <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-4">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 ios-glass border-t border-white/[0.08] pb-safe-bottom">
+      <div className="flex items-center justify-around h-[58px] max-w-lg mx-auto px-2">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
@@ -38,24 +37,22 @@ export const Navigation: React.FC<NavigationProps> = ({
             <button
               key={tab.key}
               onClick={() => onSelectTab(tab.key)}
-              className={`relative flex flex-col items-center justify-center flex-1 py-1.5 transition-all active:scale-95 ${
-                isActive ? 'text-white' : 'text-[#8E8E93] hover:text-slate-300'
-              }`}
+              className="relative flex flex-col items-center justify-center flex-1 py-1 group select-none outline-none"
             >
-              <div className="relative">
+              <div className="relative flex items-center justify-center">
                 <Icon
-                  className={`w-6 h-6 transition-all duration-200 ${
-                    isActive ? (tab.color || 'text-white') : 'text-[#8E8E93]'
+                  className={`w-[22px] h-[22px] transition-all duration-200 ${
+                    isActive ? 'text-white scale-105' : 'text-[#8E8E93] group-hover:text-slate-200'
                   }`}
-                  strokeWidth={isActive ? 2.3 : 1.8}
+                  strokeWidth={isActive ? 2.4 : 1.7}
                 />
                 {tab.badge && (
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse ring-2 ring-black"></span>
+                  <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-[#0A84FF] ring-2 ring-black animate-pulse" />
                 )}
               </div>
               <span
-                className={`text-[11px] mt-1 tracking-tight transition-colors ${
-                  isActive ? (tab.color || 'text-white font-semibold') : 'text-[#8E8E93] font-medium'
+                className={`text-[10px] mt-1 tracking-tight transition-colors duration-200 ${
+                  isActive ? 'text-white font-semibold' : 'text-[#8E8E93] font-medium'
                 }`}
               >
                 {tab.label}

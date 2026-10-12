@@ -11,8 +11,7 @@ import {
 import type { BodyPart, WorkoutSet, BodyMetric } from '../types';
 import { db, getLocalDate } from '../db';
 import { awardExp, EXP_RULES, getDailyCapInfo } from '../services/expService';
-import confetti from 'canvas-confetti';
-import { IOSAlert } from './IOSModal';
+import { IOSAlert, IOSSheet } from './IOSModal';
 
 interface BodyTabProps {
   refreshData: () => void;
@@ -30,8 +29,8 @@ interface RoutinePreset {
 const QUICK_ROUTINES: RoutinePreset[] = [
   {
     id: 'walk_steps',
-    name: '日常健步 / 步数达标',
-    desc: '户外散步、通勤走动 30 分钟，激活下肢循环',
+    name: '户外健步 / 针对性散步',
+    desc: '户外快走 30 分钟，激活心肺与下肢淋巴微循环',
     bodyPart: 'legs',
     icon: Footprints,
     defaultReps: 3000
@@ -68,6 +67,17 @@ export const BodyTab: React.FC<BodyTabProps> = ({ refreshData }) => {
   const [showCustomModal, setShowCustomModal] = useState<boolean>(false);
   const [showWeightSection, setShowWeightSection] = useState<boolean>(false);
   const [alertInfo, setAlertInfo] = useState<{ title: string; message?: string } | null>(null);
+
+  // Floating reward toast state
+  const [floatingReward, setFloatingReward] = useState<{ text: string; id: number } | null>(null);
+
+  const showRewardBadge = (text: string) => {
+    const id = Date.now();
+    setFloatingReward({ text, id });
+    setTimeout(() => {
+      setFloatingReward((current) => (current?.id === id ? null : current));
+    }, 1600);
+  };
 
   // Custom Workout input
   const [customName, setCustomName] = useState<string>('');
@@ -125,7 +135,7 @@ export const BodyTab: React.FC<BodyTabProps> = ({ refreshData }) => {
     });
 
     if (tx) {
-      confetti({ particleCount: 45, spread: 60, origin: { y: 0.6 } });
+      showRewardBadge(`+${EXP_RULES.WORKOUT} 活力值`);
     }
 
     loadData();
@@ -165,7 +175,7 @@ export const BodyTab: React.FC<BodyTabProps> = ({ refreshData }) => {
       localDate: today
     });
 
-    confetti({ particleCount: 45, spread: 60, origin: { y: 0.6 } });
+    showRewardBadge(`+${EXP_RULES.WORKOUT} 活力值`);
     setShowCustomModal(false);
     setCustomName('');
     loadData();
@@ -186,16 +196,27 @@ export const BodyTab: React.FC<BodyTabProps> = ({ refreshData }) => {
     });
 
     setWeightInput('');
+    showRewardBadge('体重已记录');
     loadData();
   };
 
   return (
-    <div className="space-y-6 px-5 py-4 max-w-lg mx-auto pb-28">
+    <div className="relative space-y-5 px-5 py-3.5 max-w-lg mx-auto pb-28">
+      {/* Floating Micro Reward Pill */}
+      {floatingReward && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-float-reward">
+          <div className="px-4 py-1.5 rounded-full bg-white/90 text-black text-xs font-bold tracking-tight shadow-xl backdrop-blur-md flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#30D158]" />
+            {floatingReward.text}
+          </div>
+        </div>
+      )}
+
       {/* Top Bar */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">身体活力</h2>
-          <p className="text-xs text-[#8E8E93] mt-1">远离久坐 · 唤醒肌肉 · 保持充沛精力</p>
+          <h2 className="text-xl font-bold text-white tracking-tight">身体活力</h2>
+          <p className="text-xs text-[#8E8E93] mt-0.5">进阶力量与体能激活 · 基础步数日常在「今日」维系</p>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs font-mono text-[#8E8E93] px-3 py-1 rounded-full bg-[#1C1C1E] border border-white/10">
@@ -203,24 +224,24 @@ export const BodyTab: React.FC<BodyTabProps> = ({ refreshData }) => {
           </span>
           <button
             onClick={() => setShowWeightSection(!showWeightSection)}
-            className="w-10 h-10 rounded-full bg-[#1C1C1E] border border-white/10 text-slate-300 hover:text-white flex items-center justify-center active:scale-95 transition-all shadow-sm"
+            className="w-9 h-9 rounded-full bg-[#1C1C1E] border border-white/10 text-slate-300 hover:text-white flex items-center justify-center active:scale-95 transition-all shadow-sm"
             title="体重记录"
           >
-            <Scale className="w-4 h-4 text-emerald-400" />
+            <Scale className="w-4 h-4 text-[#30D158]" />
           </button>
         </div>
       </div>
 
       {/* Weight Section (Collapsible) */}
       {showWeightSection && (
-        <div className="p-5 rounded-3xl bg-[#1C1C1E] border border-emerald-500/30 space-y-3 animate-fade-in shadow-md">
+        <div className="p-4 rounded-3xl bg-[#1C1C1E] border border-emerald-500/30 space-y-3 animate-fade-in shadow-md">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-bold text-white flex items-center gap-2">
-              <Scale className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-bold text-white flex items-center gap-2">
+              <Scale className="w-3.5 h-3.5 text-[#30D158]" />
               体重记录 (kg)
             </span>
             {recentMetrics[0]?.weightKg && (
-              <span className="text-xs text-emerald-400 font-mono font-semibold">
+              <span className="text-xs text-[#30D158] font-mono font-semibold">
                 最新: {recentMetrics[0].weightKg} kg
               </span>
             )}
@@ -229,14 +250,15 @@ export const BodyTab: React.FC<BodyTabProps> = ({ refreshData }) => {
             <input
               type="number"
               step="0.1"
+              inputMode="decimal"
               placeholder="输入今日体重，如 68.5"
               value={weightInput}
               onChange={(e) => setWeightInput(e.target.value)}
-              className="flex-1 h-12 px-4 rounded-2xl bg-[#2C2C2E] border border-white/[0.08] text-sm text-white focus:outline-none focus:border-emerald-500/50"
+              className="flex-1 h-11 px-4 rounded-xl bg-[#2C2C2E] border border-white/[0.08] text-xs text-white focus:outline-none focus:border-emerald-500/50"
             />
             <button
               onClick={handleSaveWeight}
-              className="h-12 px-5 rounded-2xl bg-[#34C759] text-white font-semibold text-sm active:scale-95 shadow-sm"
+              className="h-11 px-4 rounded-xl bg-[#30D158] text-white font-semibold text-xs active:scale-95 shadow-sm"
             >
               保存
             </button>
@@ -245,9 +267,9 @@ export const BodyTab: React.FC<BodyTabProps> = ({ refreshData }) => {
       )}
 
       {/* 4 Easy Routine Cards */}
-      <div className="space-y-3.5">
-        <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider block px-1">
-          今日身体激活 · 点击即打卡
+      <div className="space-y-3">
+        <span className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider block px-1">
+          今日专项激活 · 点击即打卡
         </span>
 
         {QUICK_ROUTINES.map((routine) => {
@@ -257,31 +279,31 @@ export const BodyTab: React.FC<BodyTabProps> = ({ refreshData }) => {
           return (
             <div
               key={routine.id}
-              className="p-5 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between gap-4 shadow-sm hover:bg-[#242426] transition-all"
+              className="p-4 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between gap-3 shadow-sm hover:bg-[#242426] transition-all"
             >
-              <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                <span className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
-                  isDoneToday ? 'bg-emerald-500/20 text-emerald-400' : 'bg-[#2C2C2E] text-slate-200'
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <span className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
+                  isDoneToday ? 'bg-emerald-500/20 text-[#30D158]' : 'bg-[#2C2C2E] text-slate-200'
                 }`}>
-                  <Icon className="w-6 h-6" />
+                  <Icon className="w-5 h-5" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <h4 className="text-base font-bold text-white leading-snug">{routine.name}</h4>
-                  <p className="text-xs text-[#8E8E93] mt-1 leading-relaxed">{routine.desc}</p>
+                  <h4 className="text-sm font-bold text-white leading-snug">{routine.name}</h4>
+                  <p className="text-[11px] text-[#8E8E93] mt-0.5 leading-relaxed truncate">{routine.desc}</p>
                 </div>
               </div>
 
               {isDoneToday ? (
-                <span className="h-11 px-4 rounded-2xl bg-emerald-500/15 text-emerald-400 font-semibold text-xs flex items-center gap-1.5 shrink-0 border border-emerald-500/20">
-                  <CheckCircle2 className="w-4 h-4" />
+                <span className="h-10 px-3.5 rounded-xl bg-emerald-500/15 text-[#30D158] font-semibold text-xs flex items-center gap-1 shrink-0 border border-emerald-500/20">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
                   已达标
                 </span>
               ) : (
                 <button
                   onClick={() => handleQuickCheckin(routine)}
-                  className="h-11 px-4 rounded-2xl bg-[#34C759] hover:bg-emerald-400 active:scale-95 text-white font-semibold text-xs shadow-md shadow-green-500/20 transition-all shrink-0 flex items-center gap-1.5"
+                  className="h-10 px-3.5 rounded-xl bg-[#30D158] hover:bg-emerald-400 active:scale-95 text-white font-semibold text-xs shadow-md shadow-green-500/20 transition-all shrink-0 flex items-center gap-1 cursor-pointer"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-3.5 h-3.5" />
                   打卡 +25
                 </button>
               )}
@@ -291,14 +313,14 @@ export const BodyTab: React.FC<BodyTabProps> = ({ refreshData }) => {
       </div>
 
       {/* Custom Workout Card / Trigger */}
-      <div className="p-5 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between shadow-sm">
+      <div className="p-4 rounded-3xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between shadow-sm">
         <div>
-          <h4 className="text-base font-bold text-white">进阶力量训练记录</h4>
-          <p className="text-xs text-[#8E8E93] mt-0.5">有器械或专项训练？可记录组数与负重</p>
+          <h4 className="text-sm font-bold text-white">进阶力量训练记录</h4>
+          <p className="text-[11px] text-[#8E8E93] mt-0.5">有器械或专项训练？可记录组数与负重</p>
         </div>
         <button
           onClick={() => setShowCustomModal(true)}
-          className="h-11 px-4 rounded-2xl bg-[#2C2C2E] hover:bg-[#3A3A3C] text-slate-200 font-semibold text-xs border border-white/10 active:scale-95 transition-all"
+          className="h-10 px-3.5 rounded-xl bg-[#2C2C2E] hover:bg-[#3A3A3C] text-slate-200 font-semibold text-xs border border-white/10 active:scale-95 transition-all"
         >
           添加记录
         </button>
@@ -306,106 +328,93 @@ export const BodyTab: React.FC<BodyTabProps> = ({ refreshData }) => {
 
       {/* Today Completed Sets Log */}
       {todayCompletedSets.length > 0 && (
-        <div className="space-y-3">
-          <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider block px-1">
+        <div className="space-y-2">
+          <span className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider block px-1">
             今日完成动态
           </span>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {todayCompletedSets.map((set) => (
               <div
                 key={set.id}
-                className="p-4 rounded-2xl bg-[#1C1C1E] border border-white/[0.06] flex items-center justify-between text-xs text-[#8E8E93]"
+                className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.06] flex items-center justify-between text-xs text-[#8E8E93]"
               >
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span className="text-sm font-semibold text-white">{set.exerciseName}</span>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#30D158]" />
+                  <span className="text-xs font-semibold text-white">{set.exerciseName}</span>
                 </div>
-                <span className="font-mono text-emerald-400 font-semibold">+25 Body EXP</span>
+                <span className="font-mono text-[#30D158] font-semibold">+25 Body EXP</span>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Custom Workout Modal */}
-      {showCustomModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-5 animate-fade-in">
-          <div className="w-full max-w-sm bg-[#1C1C1E] border border-white/10 rounded-[24px] p-6 shadow-2xl space-y-5">
-            {/* iOS Navigation Header */}
-            <div className="flex items-center justify-between">
-              <button
-                type="button"
-                onClick={() => setShowCustomModal(false)}
-                className="text-[17px] text-[#007AFF] font-normal active:opacity-60"
-              >
-                取消
-              </button>
-              <h3 className="text-[17px] font-semibold text-white">进阶力量记录</h3>
-              <button
-                type="button"
-                onClick={handleSaveCustomWorkout}
-                className="text-[17px] text-[#007AFF] font-semibold active:opacity-60"
-              >
-                完成
-              </button>
+      {/* Custom Workout iOS Page Sheet (Bottom Drawer) */}
+      <IOSSheet
+        isOpen={showCustomModal}
+        onClose={() => setShowCustomModal(false)}
+        title="进阶力量记录"
+        confirmText="完成"
+        onConfirm={handleSaveCustomWorkout}
+      >
+        <div className="space-y-4">
+          <div className="rounded-2xl bg-[#2C2C2E] divide-y divide-white/[0.08] overflow-hidden text-sm">
+            <div className="px-4 py-3 flex items-center justify-between">
+              <span className="text-slate-200 font-medium shrink-0">动作名称</span>
+              <input
+                type="text"
+                placeholder="如：哑铃侧平举"
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                className="bg-transparent text-right text-white placeholder-[#8E8E93] text-sm focus:outline-none flex-1 ml-3"
+              />
             </div>
 
-            {/* iOS Grouped Inputs */}
-            <div className="rounded-2xl bg-[#2C2C2E] divide-y divide-white/[0.08] overflow-hidden text-sm">
-              <div className="px-4 py-3 flex items-center justify-between">
-                <span className="text-slate-200 font-medium shrink-0">动作名称</span>
-                <input
-                  type="text"
-                  placeholder="如：哑铃侧平举"
-                  value={customName}
-                  onChange={(e) => setCustomName(e.target.value)}
-                  className="bg-transparent text-right text-white placeholder-[#8E8E93] text-sm focus:outline-none flex-1 ml-3"
-                />
-              </div>
-
-              <div className="px-4 py-3 flex items-center justify-between">
-                <span className="text-slate-200 font-medium shrink-0">完成组数</span>
-                <input
-                  type="number"
-                  value={customSets}
-                  onChange={(e) => setCustomSets(parseInt(e.target.value) || 1)}
-                  className="bg-transparent text-right text-white font-mono text-sm focus:outline-none w-20"
-                />
-              </div>
-
-              <div className="px-4 py-3 flex items-center justify-between">
-                <span className="text-slate-200 font-medium shrink-0">每组次数</span>
-                <input
-                  type="number"
-                  value={customReps}
-                  onChange={(e) => setCustomReps(parseInt(e.target.value) || 1)}
-                  className="bg-transparent text-right text-white font-mono text-sm focus:outline-none w-20"
-                />
-              </div>
-
-              <div className="px-4 py-3 flex items-center justify-between">
-                <span className="text-slate-200 font-medium shrink-0">负重 (kg)</span>
-                <input
-                  type="number"
-                  step="0.5"
-                  placeholder="自重填 0"
-                  value={customWeight}
-                  onChange={(e) => setCustomWeight(e.target.value)}
-                  className="bg-transparent text-right text-white font-mono placeholder-[#8E8E93] text-sm focus:outline-none w-24"
-                />
-              </div>
+            <div className="px-4 py-3 flex items-center justify-between">
+              <span className="text-slate-200 font-medium shrink-0">完成组数</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                value={customSets}
+                onChange={(e) => setCustomSets(parseInt(e.target.value) || 1)}
+                className="bg-transparent text-right text-white font-mono text-sm focus:outline-none w-20"
+              />
             </div>
 
-            <button
-              type="button"
-              onClick={handleSaveCustomWorkout}
-              className="w-full h-12 rounded-2xl bg-[#34C759] hover:bg-emerald-400 text-white font-semibold text-[15px] shadow-md transition-all active:scale-95"
-            >
-              保存并打卡 (+25 EXP)
-            </button>
+            <div className="px-4 py-3 flex items-center justify-between">
+              <span className="text-slate-200 font-medium shrink-0">每组次数</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                value={customReps}
+                onChange={(e) => setCustomReps(parseInt(e.target.value) || 1)}
+                className="bg-transparent text-right text-white font-mono text-sm focus:outline-none w-20"
+              />
+            </div>
+
+            <div className="px-4 py-3 flex items-center justify-between">
+              <span className="text-slate-200 font-medium shrink-0">负重 (kg)</span>
+              <input
+                type="number"
+                step="0.5"
+                inputMode="decimal"
+                placeholder="自重填 0"
+                value={customWeight}
+                onChange={(e) => setCustomWeight(e.target.value)}
+                className="bg-transparent text-right text-white font-mono placeholder-[#8E8E93] text-sm focus:outline-none w-24"
+              />
+            </div>
           </div>
+
+          <button
+            type="button"
+            onClick={handleSaveCustomWorkout}
+            className="w-full h-12 rounded-2xl bg-[#30D158] hover:bg-emerald-400 text-white font-semibold text-sm shadow-md transition-all active:scale-95"
+          >
+            保存并打卡 (+25 EXP)
+          </button>
         </div>
-      )}
+      </IOSSheet>
 
       {/* iOS Alert Dialog for Error / Notifications */}
       <IOSAlert

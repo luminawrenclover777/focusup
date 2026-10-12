@@ -41,11 +41,63 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   height: 0px !important;
 }
 
-/* iOS Grouped Card */
+/* iOS Card & Glass Surfaces */
 .ios-card {
   background-color: #1C1C1E;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 1.5rem;
+  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.45);
+}
+
+.ios-glass {
+  background-color: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.ios-card-glass {
+  background-color: rgba(28, 28, 30, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.5rem;
+}
+
+/* Custom iOS Range Slider */
+.ios-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  background: #2C2C2E;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.ios-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 1px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.ios-slider::-webkit-slider-thumb:active {
+  transform: scale(1.15);
+}
+
+.ios-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 1px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
 }
 
 @keyframes fadeIn {
@@ -59,6 +111,44 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   }
 }
 
+@keyframes sheetUp {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatUpReward {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px) scale(0.9);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -4px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -16px) scale(0.95);
+  }
+}
+
 .animate-fade-in {
-  animation: fadeIn 0.18s ease-out forwards;
+  animation: fadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-sheet-up {
+  animation: sheetUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-float-reward {
+  animation: floatUpReward 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
