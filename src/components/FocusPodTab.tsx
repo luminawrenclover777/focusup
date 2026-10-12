@@ -325,17 +325,19 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
     <div className="space-y-5 px-5 py-3.5 max-w-lg mx-auto pb-28">
       {/* Timer Display Card */}
       <div className="p-6 rounded-3xl bg-gradient-to-b from-[#1C1C1E] to-[#161618] border border-white/10 shadow-lg flex flex-col items-center relative overflow-hidden">
-        {/* Ambient background glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#0A84FF]/10 rounded-full blur-3xl pointer-events-none" />
+        {/* Ambient background glow - pure radial gradient without CSS blur bounding box artifacts */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(10,132,255,0.09)_0%,transparent_65%)] pointer-events-none" />
 
         {/* Top Status */}
         <div className="w-full flex items-center justify-between text-xs text-[#8E8E93] mb-2 relative z-10">
           <span className="flex items-center gap-2 font-medium">
             <span className={`w-2 h-2 rounded-full ${activeSession ? (isPaused ? 'bg-[#FF9F0A]' : 'bg-[#30D158] animate-pulse') : 'bg-[#636366]'}`} />
-            <span className="text-slate-200">{activeSession ? (isPaused ? '已暂停' : '专注心流中') : '准备开始'}</span>
+            <span className="text-slate-200">{activeSession ? (isPaused ? '已暂停' : '专注心流中') : '准备就绪'}</span>
           </span>
-          <span className="text-[11px] px-3 py-1 rounded-full bg-[#2C2C2E] text-slate-300 font-medium">
-            {activeSession?.mode === 'stopwatch' ? '心流正向' : `${activeSession?.targetSeconds ? Math.floor(activeSession.targetSeconds / 60) + ' 分钟倒计时' : '自律时刻'}`}
+          <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-white/[0.05] border border-white/[0.08] text-slate-300 font-medium">
+            {activeSession
+              ? (activeSession.mode === 'stopwatch' ? '正向心流' : `${Math.floor((activeSession.targetSeconds || 0) / 60)} 分钟倒计时`)
+              : (timerMode === 'stopwatch' ? '正向心流' : `${targetMinutes} 分钟倒计时`)}
           </span>
         </div>
 
@@ -568,7 +570,7 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xl p-4 sm:p-5 animate-fade-in">
           <div className="w-full max-w-sm bg-[#1C1C1E] border border-white/10 rounded-[28px] p-6 shadow-2xl relative overflow-hidden flex flex-col gap-4 text-white">
             {/* Ambient Top Glow */}
-            <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-48 bg-[#0A84FF]/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(10,132,255,0.16)_0%,transparent_65%)] pointer-events-none" />
 
             {/* Header */}
             <div className="text-center relative z-10">

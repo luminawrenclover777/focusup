@@ -143,13 +143,13 @@ export const BrakeTab: React.FC<BrakeTabProps> = ({ onStartFocus, onRefreshData 
       <div className="p-8 rounded-3xl bg-[#1C1C1E] border border-white/10 flex flex-col items-center justify-center relative overflow-hidden min-h-[320px]">
         {/* Ambient Glow */}
         <div
-          className={`absolute inset-0 rounded-3xl blur-3xl opacity-20 pointer-events-none transition-all duration-1000 ${
+          className={`absolute inset-0 pointer-events-none transition-all duration-1000 ${
             phase === 'inhale'
-              ? 'bg-[#0A84FF] scale-110'
+              ? 'bg-[radial-gradient(circle_at_center,rgba(10,132,255,0.2)_0%,transparent_70%)]'
               : phase === 'hold'
-              ? 'bg-[#FF9F0A] scale-100'
+              ? 'bg-[radial-gradient(circle_at_center,rgba(255,159,10,0.2)_0%,transparent_70%)]'
               : phase === 'exhale'
-              ? 'bg-[#30D158] scale-90'
+              ? 'bg-[radial-gradient(circle_at_center,rgba(48,209,88,0.2)_0%,transparent_70%)]'
               : 'bg-transparent'
           }`}
         />
