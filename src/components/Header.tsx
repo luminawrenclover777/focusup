@@ -20,7 +20,7 @@ export const Header: React.FC<HeaderProps> = ({
   const isRecovery = energyMode === 'recovery';
 
   return (
-    <header className="sticky top-0 z-40 bg-black/75 backdrop-blur-2xl border-b border-white/[0.08] pt-safe-top px-5 py-3.5 transition-colors">
+    <header className="sticky top-0 z-40 bg-[#000000] border-b border-white/[0.08] pt-safe-top px-5 py-3.5">
       <div className="flex items-center justify-between max-w-lg mx-auto">
         {/* App Title & Date */}
         <div>

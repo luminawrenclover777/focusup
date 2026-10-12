@@ -29,7 +29,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-2xl border-t border-white/[0.08] pb-safe-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#000000] border-t border-white/[0.08] pb-safe-bottom">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-4">
         {tabs.map((tab) => {
           const Icon = tab.icon;

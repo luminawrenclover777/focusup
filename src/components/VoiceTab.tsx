@@ -305,7 +305,7 @@ export const VoiceTab: React.FC<VoiceTabProps> = ({
                   {isRecording ? `${recordSeconds} / 60 秒` : '点击开启 60 秒倾诉'}
                 </span>
                 <p className="text-xs text-[#8E8E93] mt-2">
-                  {isRecording ? '畅所欲言，倾倒杂念…点击按钮可提前结束' : '不限内容，不设框架，讲完即打卡'}
+                  {isRecording ? '畅所欲言，倾倒杂念，点击下方按钮随时结束' : '不限内容，不设框架，讲完即打卡'}
                 </p>
               </div>
 
@@ -324,7 +324,7 @@ export const VoiceTab: React.FC<VoiceTabProps> = ({
               <textarea
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}
-                placeholder="在此写下任何随想、感悟、或是刚刚烦扰你的思绪（随便写几句即可）…"
+                placeholder="在此写下任何随想、感悟、或是刚刚烦扰你的思绪（随便写几句即可）"
                 className="w-full h-36 p-4 rounded-2xl bg-[#2C2C2E] border border-white/[0.06] text-base text-white placeholder-[#8E8E93] focus:outline-none focus:border-amber-500/50 resize-none leading-relaxed"
               />
               <button

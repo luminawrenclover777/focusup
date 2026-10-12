@@ -263,9 +263,9 @@ export const BodyTab: React.FC<BodyTabProps> = ({ refreshData }) => {
                 }`}>
                   <Icon className="w-6 h-6" />
                 </span>
-                <div className="min-w-0">
-                  <h4 className="text-base font-bold text-white truncate">{routine.name}</h4>
-                  <p className="text-xs text-[#8E8E93] mt-0.5 line-clamp-1">{routine.desc}</p>
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-base font-bold text-white leading-snug">{routine.name}</h4>
+                  <p className="text-xs text-[#8E8E93] mt-1 leading-relaxed">{routine.desc}</p>
                 </div>
               </div>
 

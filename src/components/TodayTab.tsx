@@ -77,7 +77,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
     });
 
     confetti({ particleCount: 35, spread: 60, origin: { y: 0.7 } });
-    setFeedbackMsg(tx ? `截胡成功 +${EXP_RULES.INTERCEPT} Focus EXP (已估算节省 ~20分)` : '截胡已记录 (今日奖励已满 5/5)');
+    setFeedbackMsg(tx ? `抵御诱惑成功 +${EXP_RULES.INTERCEPT} 专注值 (预估节省时间 20 分钟)` : '今日抵御诱惑已达上限 5/5');
     refreshData();
   };
 
@@ -102,7 +102,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
     });
 
     confetti({ particleCount: 40, spread: 70, origin: { y: 0.7 } });
-    setFeedbackMsg(tx ? `止损果断 +${EXP_RULES.STOP_LOSS} Focus EXP` : '止损已记录 (今日奖励已满 5/5)');
+    setFeedbackMsg(tx ? `立即刹车成功 +${EXP_RULES.STOP_LOSS} 专注值，掌控权回到手中` : '今日立即刹车已达上限 5/5');
     refreshData();
   };
 
