@@ -118,7 +118,7 @@ export const App: React.FC = () => {
     setActiveTab('focus');
   };
 
-  const handleNavigateToVoice = (trigger?: 'intercept' | 'stop_loss') => {
+  const handleNavigateToVoice = (trigger?: 'intercept' | 'stop_loss' | 'daily_practice') => {
     setVoiceInitialTrigger(trigger || 'daily_practice');
     setActiveTab('voice');
   };
@@ -135,7 +135,6 @@ export const App: React.FC = () => {
       <Header
         energyMode={energyMode}
         onToggleEnergyMode={handleToggleEnergyMode}
-        stats={stats}
         ticketBalance={ticketBalance}
         onOpenTickets={() => setActiveTab('dashboard')}
         todayCompletedCount={todayCompletedCount}
@@ -146,9 +145,11 @@ export const App: React.FC = () => {
         {activeTab === 'today' && (
           <TodayTab
             energyMode={energyMode}
+            stats={stats}
             onNavigateToFocus={handleNavigateToFocus}
             onNavigateToVoice={handleNavigateToVoice}
             onNavigateToBody={handleNavigateToBody}
+            onNavigateToDashboard={() => setActiveTab('dashboard')}
             todayHabit={todayHabit}
             onHabitChange={setTodayHabit}
             dailyCounts={dailyCounts}

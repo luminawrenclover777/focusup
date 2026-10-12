@@ -3,25 +3,29 @@ import {
   Play,
   Shield,
   ZapOff,
-  Flame,
   CheckCircle2,
   Circle,
-  Clock,
-  Sparkles,
   ArrowRight,
-  TrendingUp,
-  Info
+  Dumbbell,
+  MessageSquare
 } from 'lucide-react';
-import type { DailyHabit, EnergyMode } from '../types';
+import type { DailyHabit, EnergyMode, DimensionStats } from '../types';
 import { db, getLocalDate } from '../db';
 import { awardExp, revertExp, EXP_RULES } from '../services/expService';
 import confetti from 'canvas-confetti';
 
 interface TodayTabProps {
   energyMode: EnergyMode;
+  stats: {
+    focus: DimensionStats;
+    body: DimensionStats;
+    voice: DimensionStats;
+    totalExp: number;
+  };
   onNavigateToFocus: (defaultMinutes?: number) => void;
-  onNavigateToVoice: (trigger?: 'intercept' | 'stop_loss') => void;
+  onNavigateToVoice: (trigger?: 'intercept' | 'stop_loss' | 'daily_practice') => void;
   onNavigateToBody: () => void;
+  onNavigateToDashboard: () => void;
   todayHabit: DailyHabit;
   onHabitChange: (habit: DailyHabit) => void;
   dailyCounts: {
@@ -35,33 +39,33 @@ interface TodayTabProps {
 
 export const TodayTab: React.FC<TodayTabProps> = ({
   energyMode,
+  stats,
   onNavigateToFocus,
   onNavigateToVoice,
   onNavigateToBody,
+  onNavigateToDashboard,
   todayHabit,
   onHabitChange,
   dailyCounts,
   refreshData
 }) => {
-  const [justIntercepted, setJustIntercepted] = useState<boolean>(false);
-  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [selectedMinutes, setSelectedMinutes] = useState<number>(energyMode === 'recovery' ? 10 : 25);
+  const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
 
   const today = getLocalDate();
   const isRecovery = energyMode === 'recovery';
 
-  // Trigger Intercept
+  // Intercept action
   const handleIntercept = async () => {
     const eventId = `act_int_${Date.now()}`;
-    const activityEvent = {
+    await db.activityEvents.put({
       id: eventId,
-      type: 'intercept' as const,
+      type: 'intercept',
       createdAt: Date.now(),
       localDate: today,
       completed: true,
       estimatedMinutesSaved: 20
-    };
-
-    await db.activityEvents.put(activityEvent);
+    });
 
     const tx = await awardExp({
       dimension: 'focus',
@@ -72,34 +76,21 @@ export const TodayTab: React.FC<TodayTabProps> = ({
       localDate: today
     });
 
-    confetti({
-      particleCount: 40,
-      spread: 60,
-      origin: { y: 0.7 }
-    });
-
-    if (tx) {
-      setActionMessage(`🎉 截胡成功！获得 +${EXP_RULES.INTERCEPT} Focus EXP`);
-    } else {
-      setActionMessage('🛡️ 记录成功！今日截胡奖励次数已达上限 (5/5)，你的自控力依然值得点赞！');
-    }
-
-    setJustIntercepted(true);
+    confetti({ particleCount: 35, spread: 60, origin: { y: 0.7 } });
+    setFeedbackMsg(tx ? `截胡成功 +${EXP_RULES.INTERCEPT} Focus EXP (已估算节省 ~20分)` : '截胡已记录 (今日奖励已满 5/5)');
     refreshData();
   };
 
-  // Trigger Stop Loss
+  // Stop-loss action
   const handleStopLoss = async () => {
     const eventId = `act_sl_${Date.now()}`;
-    const activityEvent = {
+    await db.activityEvents.put({
       id: eventId,
-      type: 'stop_loss' as const,
+      type: 'stop_loss',
       createdAt: Date.now(),
       localDate: today,
       completed: true
-    };
-
-    await db.activityEvents.put(activityEvent);
+    });
 
     const tx = await awardExp({
       dimension: 'focus',
@@ -110,23 +101,12 @@ export const TodayTab: React.FC<TodayTabProps> = ({
       localDate: today
     });
 
-    confetti({
-      particleCount: 50,
-      spread: 70,
-      origin: { y: 0.7 }
-    });
-
-    if (tx) {
-      setActionMessage(`⚡ 止损果断！夺回当下注意力，获得 +${EXP_RULES.STOP_LOSS} Focus EXP`);
-    } else {
-      setActionMessage('🛡️ 记录成功！今日止损奖励次数已达上限 (5/5)，成功抢回主权！');
-    }
-
-    setJustIntercepted(true);
+    confetti({ particleCount: 40, spread: 70, origin: { y: 0.7 } });
+    setFeedbackMsg(tx ? `止损果断 +${EXP_RULES.STOP_LOSS} Focus EXP` : '止损已记录 (今日奖励已满 5/5)');
     refreshData();
   };
 
-  // Habit Toggle
+  // Habit toggle
   const toggleHabit = async (habitKey: 'protein' | 'sleep' | 'activity') => {
     const newState = !todayHabit[habitKey];
     const updated: DailyHabit = {
@@ -142,8 +122,8 @@ export const TodayTab: React.FC<TodayTabProps> = ({
     const sourceId = `habit_${habitKey}_${today}`;
     const habitNames = {
       protein: '优质蛋白质打卡',
-      sleep: '规律作息睡眠打卡',
-      activity: '日常步数/活动打卡'
+      sleep: '规律睡眠打卡',
+      activity: '日常活动步数打卡'
     };
 
     if (newState) {
@@ -155,9 +135,8 @@ export const TodayTab: React.FC<TodayTabProps> = ({
         sourceId,
         localDate: today
       });
-      confetti({ particleCount: 25, spread: 50, origin: { y: 0.8 } });
+      confetti({ particleCount: 20, spread: 45, origin: { y: 0.8 } });
     } else {
-      // Revert EXP transaction if user unchecks habit
       await revertExp({
         sourceType,
         sourceId,
@@ -169,278 +148,233 @@ export const TodayTab: React.FC<TodayTabProps> = ({
   };
 
   return (
-    <div className="space-y-4 px-4 py-3 max-w-md mx-auto">
-      {/* Recovery mode banner if active */}
-      {isRecovery && (
-        <div className="p-3 rounded-xl bg-gradient-to-r from-emerald-950/70 to-emerald-900/40 border border-emerald-700/50 flex items-start gap-2.5">
-          <Sparkles className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-          <div className="text-xs">
-            <span className="font-semibold text-emerald-300">保底日已启用</span>
-            <p className="text-slate-300 mt-0.5 leading-relaxed">
-              今天状态偏累？没关系，无需苛求高强度。为你解锁 10 分钟超短专注，任意完成一次打卡即算今日达标。
-            </p>
-          </div>
+    <div className="space-y-3.5 px-4 py-3 max-w-md mx-auto">
+      {/* 3-Dimension Compact Pill Bar */}
+      <button
+        onClick={onNavigateToDashboard}
+        className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-dark-800/60 hover:bg-dark-800 border border-white/[0.06] text-xs text-slate-300 transition-all active:scale-[0.99]"
+      >
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1.5 font-medium">
+            <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+            Focus Lv.{stats.focus.level}
+          </span>
+          <span className="flex items-center gap-1.5 font-medium">
+            <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+            Body Lv.{stats.body.level}
+          </span>
+          <span className="flex items-center gap-1.5 font-medium">
+            <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+            Voice Lv.{stats.voice.level}
+          </span>
         </div>
-      )}
+        <ArrowRight className="w-3.5 h-3.5 text-slate-500" />
+      </button>
 
-      {/* Main Action: Focus Quick Start */}
-      <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-950/60 via-dark-800 to-dark-800 border border-blue-900/40 shadow-lg shadow-blue-950/20">
-        <div className="flex items-center justify-between">
+      {/* FocusPod Hero Card */}
+      <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-b from-dark-800 to-dark-800/90 border border-white/[0.08] shadow-lg shadow-black/20">
+        <div className="flex items-center justify-between mb-3.5">
           <div>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-blue-400 flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5" />
-              FocusPod 专注仓
-            </span>
-            <h2 className="text-lg font-bold text-white mt-1">进入深度专注</h2>
-            <p className="text-xs text-slate-400 mt-0.5">
-              {isRecovery ? '推荐 10 ~ 15 分钟轻启动' : '推荐 25 分钟番茄节奏'} · 离线白噪音辅助
+            <h2 className="text-base font-bold text-white tracking-tight">专注计时</h2>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              {isRecovery ? '保底日推荐 10 分钟轻启动' : '沉浸心流 · 离线白噪音'}
             </p>
           </div>
           <button
-            onClick={() => onNavigateToFocus(isRecovery ? 10 : 25)}
-            className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-400 active:scale-90 text-white shadow-lg shadow-blue-500/30 transition-all"
+            onClick={() => onNavigateToFocus(selectedMinutes)}
+            className="flex items-center justify-center w-11 h-11 rounded-full bg-blue-500 hover:bg-blue-400 active:scale-95 text-white shadow-md shadow-blue-500/30 transition-all"
           >
-            <Play className="w-6 h-6 ml-0.5 fill-current" />
+            <Play className="w-5 h-5 ml-0.5 fill-current" />
           </button>
         </div>
 
-        <div className="mt-3.5 pt-3 border-t border-dark-700 flex items-center justify-between text-xs">
-          <div className="flex items-center gap-1.5 text-slate-400">
-            <span>预设时长：</span>
-            {isRecovery && (
-              <button
-                onClick={() => onNavigateToFocus(10)}
-                className="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800 text-emerald-300 font-medium"
-              >
-                10m
-              </button>
-            )}
+        {/* Preset Duration Chips */}
+        <div className="flex items-center gap-1.5">
+          {isRecovery && (
             <button
-              onClick={() => onNavigateToFocus(15)}
-              className="px-2 py-0.5 rounded bg-dark-700 hover:bg-dark-600 text-slate-200"
+              onClick={() => setSelectedMinutes(10)}
+              className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                selectedMinutes === 10
+                  ? 'bg-emerald-500 text-white border-emerald-400'
+                  : 'bg-dark-900/60 text-emerald-400 border-emerald-900/50'
+              }`}
             >
-              15m
+              10m
             </button>
+          )}
+          {[15, 25, 45].map((mins) => (
             <button
-              onClick={() => onNavigateToFocus(25)}
-              className="px-2 py-0.5 rounded bg-dark-700 hover:bg-dark-600 text-slate-200"
+              key={mins}
+              onClick={() => setSelectedMinutes(mins)}
+              className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                selectedMinutes === mins
+                  ? 'bg-blue-500 text-white border-blue-400'
+                  : 'bg-dark-900/60 text-slate-300 border-white/[0.06] hover:border-white/[0.12]'
+              }`}
             >
-              25m
+              {mins}m
             </button>
-            <button
-              onClick={() => onNavigateToFocus(45)}
-              className="px-2 py-0.5 rounded bg-dark-700 hover:bg-dark-600 text-slate-200"
-            >
-              45m
-            </button>
-          </div>
+          ))}
           <button
             onClick={() => onNavigateToFocus(0)}
-            className="text-blue-400 hover:text-blue-300 flex items-center gap-0.5 font-medium"
+            className="flex-1 py-1.5 rounded-lg text-xs font-semibold border bg-dark-900/60 text-slate-300 border-white/[0.06] hover:text-white"
           >
-            心流正向 <ArrowRight className="w-3.5 h-3.5" />
+            心流
           </button>
         </div>
       </div>
 
-      {/* Short Video Interceptors (The Core Disruptor) */}
-      <div className="space-y-2.5">
-        <div className="flex items-center justify-between px-1">
-          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-            <Flame className="w-3.5 h-3.5 text-orange-400" />
-            反短视频破局器
-          </h3>
-          <span className="text-[11px] text-slate-400">点击即刻重掌主动权</span>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2.5">
-          {/* Intercept Button */}
-          <button
-            onClick={handleIntercept}
-            className="group relative flex flex-col justify-between p-3.5 rounded-xl bg-dark-800 border border-dark-700 hover:border-blue-500/50 active:scale-[0.98] transition-all text-left"
-          >
-            <div>
-              <div className="flex items-center justify-between">
-                <span className="p-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                  <Shield className="w-4 h-4" />
-                </span>
-                <span className="text-[10px] font-medium text-slate-400">
-                  今日 {dailyCounts.interceptCount}/{dailyCounts.interceptCap}
-                </span>
-              </div>
-              <div className="mt-2.5">
-                <span className="text-sm font-bold text-white block group-hover:text-blue-300">
-                  事前截胡
-                </span>
-                <p className="text-[11px] text-slate-400 mt-0.5 leading-snug">
-                  想打开短视频前拦截，按 20 分钟估算潜在节省
-                </p>
-              </div>
-            </div>
-            <div className="mt-3 flex items-center justify-between pt-2 border-t border-dark-700/60 text-[11px]">
-              <span className="text-blue-400 font-semibold">+{EXP_RULES.INTERCEPT} Focus</span>
-              <span className="text-[10px] text-slate-400">（估算值）</span>
-            </div>
-          </button>
-
-          {/* Stop-Loss Button */}
-          <button
-            onClick={handleStopLoss}
-            className="group relative flex flex-col justify-between p-3.5 rounded-xl bg-dark-800 border border-dark-700 hover:border-orange-500/50 active:scale-[0.98] transition-all text-left"
-          >
-            <div>
-              <div className="flex items-center justify-between">
-                <span className="p-2 rounded-lg bg-orange-500/10 text-orange-400 border border-orange-500/20">
-                  <ZapOff className="w-4 h-4" />
-                </span>
-                <span className="text-[10px] font-medium text-slate-400">
-                  今日 {dailyCounts.stopLossCount}/{dailyCounts.stopLossCap}
-                </span>
-              </div>
-              <div className="mt-2.5">
-                <span className="text-sm font-bold text-white block group-hover:text-orange-300">
-                  主动止损
-                </span>
-                <p className="text-[11px] text-slate-400 mt-0.5 leading-snug">
-                  已经点开？立刻停住，不追责不留负债
-                </p>
-              </div>
-            </div>
-            <div className="mt-3 flex items-center justify-between pt-2 border-t border-dark-700/60 text-[11px]">
-              <span className="text-orange-400 font-semibold">+{EXP_RULES.STOP_LOSS} Focus</span>
-              <span className="text-[10px] text-slate-400">即刻切断</span>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      {/* Post-Interception Guidance Modal / Banner */}
-      {justIntercepted && actionMessage && (
-        <div className="p-3.5 rounded-xl bg-dark-800/90 border border-blue-500/40 animate-fade-in space-y-2">
+      {/* Dual Interceptor Buttons */}
+      <div className="grid grid-cols-2 gap-2.5">
+        <button
+          onClick={handleIntercept}
+          className="p-3.5 rounded-2xl bg-dark-800/80 hover:bg-dark-800 border border-white/[0.07] active:scale-[0.98] transition-all text-left flex flex-col justify-between"
+        >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-200">{actionMessage}</span>
+            <span className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400">
+              <Shield className="w-4 h-4" />
+            </span>
+            <span className="text-[10px] text-slate-400 font-mono">
+              {dailyCounts.interceptCount}/{dailyCounts.interceptCap}
+            </span>
+          </div>
+          <div className="mt-3">
+            <span className="text-sm font-bold text-white block">事前截胡</span>
+            <span className="text-[11px] text-blue-400 font-semibold block mt-0.5">
+              +{EXP_RULES.INTERCEPT} Focus
+            </span>
+          </div>
+        </button>
+
+        <button
+          onClick={handleStopLoss}
+          className="p-3.5 rounded-2xl bg-dark-800/80 hover:bg-dark-800 border border-white/[0.07] active:scale-[0.98] transition-all text-left flex flex-col justify-between"
+        >
+          <div className="flex items-center justify-between">
+            <span className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400">
+              <ZapOff className="w-4 h-4" />
+            </span>
+            <span className="text-[10px] text-slate-400 font-mono">
+              {dailyCounts.stopLossCount}/{dailyCounts.stopLossCap}
+            </span>
+          </div>
+          <div className="mt-3">
+            <span className="text-sm font-bold text-white block">主动止损</span>
+            <span className="text-[11px] text-amber-400 font-semibold block mt-0.5">
+              +{EXP_RULES.STOP_LOSS} Focus
+            </span>
+          </div>
+        </button>
+      </div>
+
+      {/* Reactive Guidance Banner */}
+      {feedbackMsg && (
+        <div className="p-2.5 rounded-xl bg-dark-800 border border-blue-500/30 text-xs flex items-center justify-between animate-fade-in">
+          <span className="text-slate-200 font-medium">{feedbackMsg}</span>
+          <div className="flex items-center gap-1.5">
             <button
-              onClick={() => setJustIntercepted(false)}
-              className="text-xs text-slate-400 hover:text-white"
+              onClick={() => onNavigateToVoice('intercept')}
+              className="text-amber-400 hover:text-amber-300 font-semibold text-[11px]"
+            >
+              60秒表达 →
+            </button>
+            <button
+              onClick={() => setFeedbackMsg(null)}
+              className="text-slate-500 hover:text-slate-300 ml-1"
             >
               ✕
             </button>
           </div>
-          <div className="pt-2 border-t border-dark-700 flex items-center gap-2">
-            <button
-              onClick={() => {
-                setJustIntercepted(false);
-                onNavigateToVoice('intercept');
-              }}
-              className="flex-1 py-1.5 px-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-medium flex items-center justify-center gap-1"
-            >
-              切换至 60 秒思考表达 <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => {
-                setJustIntercepted(false);
-                onNavigateToFocus(15);
-              }}
-              className="py-1.5 px-3 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 text-xs font-medium"
-            >
-              去专注 15m
-            </button>
-          </div>
         </div>
       )}
 
-      {/* Daily 3 Habits (Body Foundation) */}
-      <div className="p-4 rounded-xl bg-dark-800 border border-dark-700">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-1.5">
-            <TrendingUp className="w-4 h-4 text-emerald-400" />
-            <h3 className="text-sm font-semibold text-white">日常基石习惯</h3>
-          </div>
-          <span className="text-[11px] text-slate-400">每项 +5 Body EXP / 天</span>
+      {/* Daily Habits Checklist */}
+      <div className="p-3.5 rounded-2xl bg-dark-800/70 border border-white/[0.07] space-y-2.5">
+        <div className="flex items-center justify-between px-0.5">
+          <span className="text-xs font-bold text-slate-300 tracking-tight">基石习惯</span>
+          <span className="text-[10px] text-slate-500">+5 Body EXP / 项</span>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {/* Protein */}
           <div
             onClick={() => toggleHabit('protein')}
-            className="flex items-center justify-between p-2.5 rounded-lg bg-dark-900/60 border border-dark-700/60 cursor-pointer active:scale-[0.99] transition-all"
+            className="flex items-center justify-between py-2 px-2.5 rounded-xl bg-dark-900/50 hover:bg-dark-900/80 cursor-pointer active:scale-[0.99] transition-all"
           >
             <div className="flex items-center gap-2.5">
               {todayHabit.protein ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               ) : (
-                <Circle className="w-5 h-5 text-slate-500" />
+                <Circle className="w-4 h-4 text-slate-600" />
               )}
-              <div>
-                <span className={`text-xs font-medium ${todayHabit.protein ? 'text-emerald-300 line-through' : 'text-slate-200'}`}>
-                  优质蛋白质摄入
-                </span>
-                <p className="text-[10px] text-slate-400">蛋/肉/奶/豆制品，补充身体自愈基石</p>
-              </div>
+              <span className={`text-xs ${todayHabit.protein ? 'text-slate-400 line-through' : 'text-slate-200 font-medium'}`}>
+                优质蛋白质摄入
+              </span>
             </div>
-            <span className="text-[11px] text-emerald-400/80 font-mono font-medium">+5 EXP</span>
+            <span className="text-[10px] text-emerald-400/70 font-mono">+5</span>
           </div>
 
           {/* Sleep */}
           <div
             onClick={() => toggleHabit('sleep')}
-            className="flex items-center justify-between p-2.5 rounded-lg bg-dark-900/60 border border-dark-700/60 cursor-pointer active:scale-[0.99] transition-all"
+            className="flex items-center justify-between py-2 px-2.5 rounded-xl bg-dark-900/50 hover:bg-dark-900/80 cursor-pointer active:scale-[0.99] transition-all"
           >
             <div className="flex items-center gap-2.5">
               {todayHabit.sleep ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               ) : (
-                <Circle className="w-5 h-5 text-slate-500" />
+                <Circle className="w-4 h-4 text-slate-600" />
               )}
-              <div>
-                <span className={`text-xs font-medium ${todayHabit.sleep ? 'text-emerald-300 line-through' : 'text-slate-200'}`}>
-                  规律睡眠作息
-                </span>
-                <p className="text-[10px] text-slate-400">昨晚或今晚保障充分深度休息</p>
-              </div>
+              <span className={`text-xs ${todayHabit.sleep ? 'text-slate-400 line-through' : 'text-slate-200 font-medium'}`}>
+                规律睡眠作息
+              </span>
             </div>
-            <span className="text-[11px] text-emerald-400/80 font-mono font-medium">+5 EXP</span>
+            <span className="text-[10px] text-emerald-400/70 font-mono">+5</span>
           </div>
 
-          {/* Activity / Steps */}
+          {/* Activity */}
           <div
             onClick={() => toggleHabit('activity')}
-            className="flex items-center justify-between p-2.5 rounded-lg bg-dark-900/60 border border-dark-700/60 cursor-pointer active:scale-[0.99] transition-all"
+            className="flex items-center justify-between py-2 px-2.5 rounded-xl bg-dark-900/50 hover:bg-dark-900/80 cursor-pointer active:scale-[0.99] transition-all"
           >
             <div className="flex items-center gap-2.5">
               {todayHabit.activity ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               ) : (
-                <Circle className="w-5 h-5 text-slate-500" />
+                <Circle className="w-4 h-4 text-slate-600" />
               )}
-              <div>
-                <span className={`text-xs font-medium ${todayHabit.activity ? 'text-emerald-300 line-through' : 'text-slate-200'}`}>
-                  日常步数 / 离座活动
-                </span>
-                <p className="text-[10px] text-slate-400">散步、爬楼梯或工位微拉伸，打破连续久坐</p>
-              </div>
+              <span className={`text-xs ${todayHabit.activity ? 'text-slate-400 line-through' : 'text-slate-200 font-medium'}`}>
+                日常步数与微活动
+              </span>
             </div>
-            <span className="text-[11px] text-emerald-400/80 font-mono font-medium">+5 EXP</span>
+            <span className="text-[10px] text-emerald-400/70 font-mono">+5</span>
           </div>
-        </div>
-
-        <div className="mt-3 pt-2.5 border-t border-dark-700/60 flex items-center justify-between">
-          <span className="text-[11px] text-slate-400">想练薄肌力量？</span>
-          <button
-            onClick={onNavigateToBody}
-            className="text-xs text-emerald-400 hover:text-emerald-300 font-medium flex items-center gap-1"
-          >
-            打开薄肌训练台 <ArrowRight className="w-3 h-3" />
-          </button>
         </div>
       </div>
 
-      {/* Honest Boundary Note */}
-      <div className="p-3 rounded-lg bg-dark-800/40 border border-dark-700/40 flex items-start gap-2 text-[11px] text-slate-400">
-        <Info className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
-        <p className="leading-relaxed">
-          <strong className="text-slate-300 font-medium">真实反馈原则：</strong> FocusUp 不自动监控其他 App 或窃取隐私。所有自控与行动记录均由你诚实记录，每一分成长皆来自你真正的主动选择。
-        </p>
+      {/* Quick Shortcuts */}
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        <button
+          onClick={onNavigateToBody}
+          className="flex items-center justify-between p-2.5 rounded-xl bg-dark-800/40 hover:bg-dark-800/70 border border-white/[0.05] text-slate-300"
+        >
+          <span className="flex items-center gap-1.5 font-medium">
+            <Dumbbell className="w-3.5 h-3.5 text-emerald-400" />
+            薄肌训练
+          </span>
+          <ArrowRight className="w-3 h-3 text-slate-500" />
+        </button>
+
+        <button
+          onClick={() => onNavigateToVoice('daily_practice')}
+          className="flex items-center justify-between p-2.5 rounded-xl bg-dark-800/40 hover:bg-dark-800/70 border border-white/[0.05] text-slate-300"
+        >
+          <span className="flex items-center gap-1.5 font-medium">
+            <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
+            60秒表达
+          </span>
+          <ArrowRight className="w-3 h-3 text-slate-500" />
+        </button>
       </div>
     </div>
   );
