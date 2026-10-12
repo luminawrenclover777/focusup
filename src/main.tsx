@@ -12,6 +12,11 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
   });
 }
 
+// Request persistent storage (prevents iOS Safari auto-eviction)
+if (navigator.storage && navigator.storage.persist) {
+  navigator.storage.persist().catch(() => {});
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />
