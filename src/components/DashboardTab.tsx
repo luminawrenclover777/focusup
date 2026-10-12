@@ -5,7 +5,6 @@ import {
   Upload,
   Calendar,
   Sparkles,
-  AlertTriangle,
   FileText
 } from 'lucide-react';
 import type { DimensionStats, TicketTransaction } from '../types';
@@ -13,6 +12,7 @@ import { db, getLocalDate } from '../db';
 import { getTicketBalance, useTicket } from '../services/ticketService';
 import { exportDatabaseToJson, validateBackup, restoreDatabaseFromJson, type BackupPreview, type BackupPayload } from '../services/backupService';
 import confetti from 'canvas-confetti';
+import { IOSAlert } from './IOSModal';
 
 interface DashboardTabProps {
   stats: {
@@ -33,6 +33,7 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ stats, refreshData }
   }>({ balance: 0, totalEarned: 0, totalUsed: 0, history: [] });
 
   const [confirmUseTicketOpen, setConfirmUseTicketOpen] = useState<boolean>(false);
+  const [appAlert, setAppAlert] = useState<{ title: string; message?: string } | null>(null);
 
   const [summary, setSummary] = useState<{
     effectiveFocusMinutes: number;
@@ -106,7 +107,7 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ stats, refreshData }
       loadDashboardData();
       refreshData();
     } else {
-      alert(res.message);
+      setAppAlert({ title: '兑换提示', message: res.message });
     }
   };
 
@@ -123,10 +124,10 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ stats, refreshData }
           setImportPreview(preview);
           setRawBackupData(json);
         } else {
-          alert(preview.error || '无效的备份文件');
+          setAppAlert({ title: '无效的备份文件', message: preview.error || '文件结构不正确' });
         }
       } catch {
-        alert('解析失败，请确保是标准的 FocusUp JSON 备份文件。');
+        setAppAlert({ title: '解析失败', message: '请确保上传的是合法的 FocusUp JSON 备份文件。' });
       }
     };
     reader.readAsText(file);
@@ -141,9 +142,9 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ stats, refreshData }
       setRawBackupData(null);
       refreshData();
       loadDashboardData();
-      alert('数据恢复成功！');
+      setAppAlert({ title: '恢复成功', message: '所有自律与专注数据已顺利恢复！' });
     } catch {
-      alert('导入失败，已回滚。');
+      setAppAlert({ title: '导入失败', message: '已自动回滚，当前数据未受破坏。' });
     }
   };
 
@@ -339,63 +340,37 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ stats, refreshData }
         </div>
       </div>
 
-      {/* Ticket Modal */}
-      {confirmUseTicketOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-5 animate-fade-in">
-          <div className="w-full max-w-sm bg-[#1C1C1E] border border-amber-500/30 rounded-3xl p-6 shadow-2xl space-y-4 text-center">
-            <Ticket className="w-10 h-10 text-amber-400 mx-auto" />
-            <h3 className="text-lg font-bold text-white">兑换 30 分钟自由娱乐？</h3>
-            <p className="text-xs text-[#8E8E93]">将扣减 1 张娱乐券，开启心安理得的娱乐时间。</p>
-            <div className="flex items-center gap-3 pt-2">
-              <button
-                onClick={handleRedeemTicket}
-                className="flex-1 h-12 rounded-2xl bg-amber-500 text-black font-bold text-sm active:scale-95 shadow-md"
-              >
-                确认兑换
-              </button>
-              <button
-                onClick={() => setConfirmUseTicketOpen(false)}
-                className="h-12 px-5 rounded-2xl bg-[#2C2C2E] text-slate-300 text-sm hover:text-white"
-              >
-                取消
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* iOS Ticket Alert */}
+      <IOSAlert
+        isOpen={confirmUseTicketOpen}
+        title="兑换 30 分钟自由娱乐？"
+        message="将扣减 1 张娱乐券，开启心安理得、无负罪感的自我犒劳时光。"
+        cancelText="稍后再用"
+        confirmText="确认兑换"
+        onCancel={() => setConfirmUseTicketOpen(false)}
+        onConfirm={handleRedeemTicket}
+      />
 
-      {/* Import Modal */}
-      {importPreview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-5 animate-fade-in">
-          <div className="w-full max-w-sm bg-[#1C1C1E] border border-rose-500/40 rounded-3xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center gap-2 text-rose-400">
-              <AlertTriangle className="w-5 h-5 shrink-0" />
-              <h3 className="text-base font-bold text-white">确认替换恢复？</h3>
-            </div>
-            <p className="text-xs text-rose-200/80">此操作将完全覆盖当前设备上的全部数据。</p>
-            <div className="text-xs text-slate-300 bg-[#2C2C2E]/70 p-3 rounded-2xl space-y-1">
-              <p>备份时间：{importPreview.exportedDate}</p>
-              <p>专注会话：{importPreview.counts.focusSessions} 条</p>
-              <p>训练记录：{importPreview.counts.workoutSets} 条</p>
-              <p>表达练习：{importPreview.counts.expressionLogs} 条</p>
-            </div>
-            <div className="flex items-center gap-3 pt-1">
-              <button
-                onClick={handleConfirmImport}
-                className="flex-1 h-12 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm active:scale-95"
-              >
-                确认替换
-              </button>
-              <button
-                onClick={() => { setImportPreview(null); setRawBackupData(null); }}
-                className="h-12 px-5 rounded-2xl bg-[#2C2C2E] text-slate-300 text-sm hover:text-white"
-              >
-                取消
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* iOS Destructive Import Alert */}
+      <IOSAlert
+        isOpen={!!importPreview}
+        title="确认替换恢复数据？"
+        message={importPreview ? `备份时间：${importPreview.exportedDate}。此操作将完全覆盖当前设备上的所有数据，请确认。` : ''}
+        cancelText="取消"
+        confirmText="确认覆盖"
+        isDestructive={true}
+        onCancel={() => { setImportPreview(null); setRawBackupData(null); }}
+        onConfirm={handleConfirmImport}
+      />
+
+      {/* iOS Global App Alert */}
+      <IOSAlert
+        isOpen={!!appAlert}
+        title={appAlert?.title || ''}
+        message={appAlert?.message}
+        confirmText="好"
+        onConfirm={() => setAppAlert(null)}
+      />
     </div>
   );
 };

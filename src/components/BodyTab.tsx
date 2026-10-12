@@ -12,6 +12,7 @@ import type { BodyPart, WorkoutSet, BodyMetric } from '../types';
 import { db, getLocalDate } from '../db';
 import { awardExp, EXP_RULES, getDailyCapInfo } from '../services/expService';
 import confetti from 'canvas-confetti';
+import { IOSAlert } from './IOSModal';
 
 interface BodyTabProps {
   refreshData: () => void;
@@ -66,6 +67,7 @@ export const BodyTab: React.FC<BodyTabProps> = ({ refreshData }) => {
   const [todayCompletedSets, setTodayCompletedSets] = useState<WorkoutSet[]>([]);
   const [showCustomModal, setShowCustomModal] = useState<boolean>(false);
   const [showWeightSection, setShowWeightSection] = useState<boolean>(false);
+  const [alertInfo, setAlertInfo] = useState<{ title: string; message?: string } | null>(null);
 
   // Custom Workout input
   const [customName, setCustomName] = useState<string>('');
@@ -133,7 +135,7 @@ export const BodyTab: React.FC<BodyTabProps> = ({ refreshData }) => {
   // Custom workout save
   const handleSaveCustomWorkout = async () => {
     if (!customName.trim()) {
-      alert('请输入动作名称');
+      setAlertInfo({ title: '请输入动作名称', message: '请填写训练项目名称，例如：哑铃侧平举或深蹲。' });
       return;
     }
     const today = getLocalDate();
@@ -327,81 +329,91 @@ export const BodyTab: React.FC<BodyTabProps> = ({ refreshData }) => {
 
       {/* Custom Workout Modal */}
       {showCustomModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-5 animate-fade-in">
-          <div className="w-full max-w-sm bg-[#1C1C1E] border border-white/10 rounded-3xl p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-5 animate-fade-in">
+          <div className="w-full max-w-sm bg-[#1C1C1E] border border-white/10 rounded-[24px] p-6 shadow-2xl space-y-5">
+            {/* iOS Navigation Header */}
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white">记录进阶训练</h3>
               <button
+                type="button"
                 onClick={() => setShowCustomModal(false)}
-                className="text-[#8E8E93] hover:text-white text-sm"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs text-[#8E8E93] block mb-1">动作名称</label>
-                <input
-                  type="text"
-                  placeholder="如：哑铃侧平举、引体向上"
-                  value={customName}
-                  onChange={(e) => setCustomName(e.target.value)}
-                  className="w-full h-11 px-3.5 rounded-xl bg-[#2C2C2E] border border-white/[0.08] text-sm text-white focus:outline-none focus:border-emerald-500/50"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2.5">
-                <div>
-                  <label className="text-xs text-[#8E8E93] block mb-1">完成组数</label>
-                  <input
-                    type="number"
-                    value={customSets}
-                    onChange={(e) => setCustomSets(parseInt(e.target.value) || 1)}
-                    className="w-full h-11 px-3.5 rounded-xl bg-[#2C2C2E] border border-white/[0.08] text-sm text-white focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-[#8E8E93] block mb-1">每组次数</label>
-                  <input
-                    type="number"
-                    value={customReps}
-                    onChange={(e) => setCustomReps(parseInt(e.target.value) || 1)}
-                    className="w-full h-11 px-3.5 rounded-xl bg-[#2C2C2E] border border-white/[0.08] text-sm text-white focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs text-[#8E8E93] block mb-1">负重 (kg，自重可留空)</label>
-                <input
-                  type="number"
-                  step="0.5"
-                  placeholder="自重留空或填 0"
-                  value={customWeight}
-                  onChange={(e) => setCustomWeight(e.target.value)}
-                  className="w-full h-11 px-3.5 rounded-xl bg-[#2C2C2E] border border-white/[0.08] text-sm text-white focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 pt-2">
-              <button
-                onClick={handleSaveCustomWorkout}
-                className="flex-1 h-13 rounded-2xl bg-[#34C759] hover:bg-emerald-400 text-white font-bold text-sm shadow-md transition-all active:scale-95"
-              >
-                保存打卡 (+25 EXP)
-              </button>
-              <button
-                onClick={() => setShowCustomModal(false)}
-                className="h-13 px-4 rounded-2xl bg-[#2C2C2E] text-slate-300 text-sm hover:text-white"
+                className="text-[17px] text-[#007AFF] font-normal active:opacity-60"
               >
                 取消
               </button>
+              <h3 className="text-[17px] font-semibold text-white">进阶力量记录</h3>
+              <button
+                type="button"
+                onClick={handleSaveCustomWorkout}
+                className="text-[17px] text-[#007AFF] font-semibold active:opacity-60"
+              >
+                完成
+              </button>
             </div>
+
+            {/* iOS Grouped Inputs */}
+            <div className="rounded-2xl bg-[#2C2C2E] divide-y divide-white/[0.08] overflow-hidden text-sm">
+              <div className="px-4 py-3 flex items-center justify-between">
+                <span className="text-slate-200 font-medium shrink-0">动作名称</span>
+                <input
+                  type="text"
+                  placeholder="如：哑铃侧平举"
+                  value={customName}
+                  onChange={(e) => setCustomName(e.target.value)}
+                  className="bg-transparent text-right text-white placeholder-[#8E8E93] text-sm focus:outline-none flex-1 ml-3"
+                />
+              </div>
+
+              <div className="px-4 py-3 flex items-center justify-between">
+                <span className="text-slate-200 font-medium shrink-0">完成组数</span>
+                <input
+                  type="number"
+                  value={customSets}
+                  onChange={(e) => setCustomSets(parseInt(e.target.value) || 1)}
+                  className="bg-transparent text-right text-white font-mono text-sm focus:outline-none w-20"
+                />
+              </div>
+
+              <div className="px-4 py-3 flex items-center justify-between">
+                <span className="text-slate-200 font-medium shrink-0">每组次数</span>
+                <input
+                  type="number"
+                  value={customReps}
+                  onChange={(e) => setCustomReps(parseInt(e.target.value) || 1)}
+                  className="bg-transparent text-right text-white font-mono text-sm focus:outline-none w-20"
+                />
+              </div>
+
+              <div className="px-4 py-3 flex items-center justify-between">
+                <span className="text-slate-200 font-medium shrink-0">负重 (kg)</span>
+                <input
+                  type="number"
+                  step="0.5"
+                  placeholder="自重填 0"
+                  value={customWeight}
+                  onChange={(e) => setCustomWeight(e.target.value)}
+                  className="bg-transparent text-right text-white font-mono placeholder-[#8E8E93] text-sm focus:outline-none w-24"
+                />
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleSaveCustomWorkout}
+              className="w-full h-12 rounded-2xl bg-[#34C759] hover:bg-emerald-400 text-white font-semibold text-[15px] shadow-md transition-all active:scale-95"
+            >
+              保存并打卡 (+25 EXP)
+            </button>
           </div>
         </div>
       )}
+
+      {/* iOS Alert Dialog for Error / Notifications */}
+      <IOSAlert
+        isOpen={!!alertInfo}
+        title={alertInfo?.title || ''}
+        message={alertInfo?.message}
+        onConfirm={() => setAlertInfo(null)}
+      />
     </div>
   );
 };

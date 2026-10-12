@@ -17,6 +17,7 @@ import { awardExp, EXP_RULES } from '../services/expService';
 import { soundSynthesizer, type SoundType } from '../services/audioService';
 import { MICRO_MOVEMENTS, type MicroMovement } from '../data/microMovementPresets';
 import confetti from 'canvas-confetti';
+import { IOSAlert } from './IOSModal';
 
 interface FocusPodTabProps {
   energyMode: EnergyMode;
@@ -50,6 +51,7 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
     earnedExp: number;
   } | null>(null);
 
+  const [showAbandonAlert, setShowAbandonAlert] = useState<boolean>(false);
   const [showMicroMovement, setShowMicroMovement] = useState<boolean>(false);
   const [selectedMovement, setSelectedMovement] = useState<MicroMovement | null>(null);
   const [movementDone, setMovementDone] = useState<boolean>(false);
@@ -219,21 +221,25 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
     });
   };
 
-  const handleAbandon = async () => {
+  const handleAbandon = () => {
     if (!activeSession) return;
-    if (window.confirm('放弃本次专注？未结算时间不计入 EXP。')) {
-      const updated: FocusSession = {
-        ...activeSession,
-        endedAt: Date.now(),
-        status: 'abandoned'
-      };
-      await db.focusSessions.put(updated);
-      setActiveSession(null);
-      soundSynthesizer.stop();
-      setSoundType('none');
-      setElapsedSeconds(0);
-      if (onActiveSessionChange) onActiveSessionChange(false);
-    }
+    setShowAbandonAlert(true);
+  };
+
+  const handleConfirmAbandon = async () => {
+    if (!activeSession) return;
+    const updated: FocusSession = {
+      ...activeSession,
+      endedAt: Date.now(),
+      status: 'abandoned'
+    };
+    await db.focusSessions.put(updated);
+    setActiveSession(null);
+    soundSynthesizer.stop();
+    setSoundType('none');
+    setElapsedSeconds(0);
+    setShowAbandonAlert(false);
+    if (onActiveSessionChange) onActiveSessionChange(false);
   };
 
   const handleConfirmSettlement = async () => {
@@ -632,6 +638,18 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
           </div>
         </div>
       )}
+
+      {/* Abandon Alert */}
+      <IOSAlert
+        isOpen={showAbandonAlert}
+        title="放弃本次专注？"
+        message="当前未结算的时长将不会计入专注经验值。"
+        cancelText="继续专注"
+        confirmText="放弃"
+        isDestructive={true}
+        onCancel={() => setShowAbandonAlert(false)}
+        onConfirm={handleConfirmAbandon}
+      />
     </div>
   );
 };
