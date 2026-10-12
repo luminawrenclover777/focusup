@@ -324,14 +324,22 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
   return (
     <div className="space-y-5 px-5 py-3.5 max-w-lg mx-auto pb-28">
       {/* Timer Display Card */}
-      <div className="p-6 rounded-3xl bg-gradient-to-b from-[#1C1C1E] to-[#161618] border border-white/10 shadow-lg flex flex-col items-center relative overflow-hidden">
+      <div className="p-6 rounded-3xl bg-gradient-to-b from-[#1C1C1E] to-[#161618] border border-white/10 shadow-lg flex flex-col items-center relative overflow-hidden isolate [transform:translateZ(0)] [backface-visibility:hidden]">
         {/* Ambient background glow - pure radial gradient without CSS blur bounding box artifacts */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(10,132,255,0.09)_0%,transparent_65%)] pointer-events-none" />
 
         {/* Top Status */}
         <div className="w-full flex items-center justify-between text-xs text-[#8E8E93] mb-2 relative z-10">
           <span className="flex items-center gap-2 font-medium">
-            <span className={`w-2 h-2 rounded-full ${activeSession ? (isPaused ? 'bg-[#FF9F0A]' : 'bg-[#30D158] animate-pulse') : 'bg-[#636366]'}`} />
+            <span
+              className={`inline-block w-2.5 h-2.5 rounded-full shrink-0 transition-colors duration-300 ${
+                activeSession
+                  ? isPaused
+                    ? 'bg-[#FF9F0A] shadow-[0_0_8px_rgba(255,159,10,0.8)]'
+                    : 'bg-[#30D158] shadow-[0_0_8px_rgba(48,209,88,0.8)]'
+                  : 'bg-white/20'
+              }`}
+            />
             <span className="text-slate-200">{activeSession ? (isPaused ? '已暂停' : '专注心流中') : '准备就绪'}</span>
           </span>
           <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-white/[0.05] border border-white/[0.08] text-slate-300 font-medium">
@@ -342,43 +350,45 @@ export const FocusPodTab: React.FC<FocusPodTabProps> = ({
         </div>
 
         {/* Circular Progress & Clock */}
-        <div className="relative my-3 flex items-center justify-center z-10">
-          <svg className="w-64 h-64 -rotate-90">
-            <circle
-              cx="128"
-              cy="128"
-              r="110"
-              stroke="#2C2C2E"
-              strokeWidth="6"
-              fill="transparent"
-            />
-            {activeSession && activeSession.mode === 'countdown' && (
+        <div className="relative my-3 flex items-center justify-center z-10 [transform:translateZ(0)]">
+          <svg className="w-64 h-64" viewBox="0 0 256 256">
+            <g transform="rotate(-90 128 128)">
               <circle
                 cx="128"
                 cy="128"
                 r="110"
-                stroke={isRecovery ? '#64D2FF' : '#0A84FF'}
+                stroke="#2C2C2E"
                 strokeWidth="6"
-                strokeDasharray={2 * Math.PI * 110}
-                strokeDashoffset={2 * Math.PI * 110 * (1 - progressRatio)}
-                strokeLinecap="round"
-                fill="transparent"
-                className="transition-all duration-300"
+                fill="none"
               />
-            )}
-            {activeSession && activeSession.mode === 'stopwatch' && (
-              <circle
-                cx="128"
-                cy="128"
-                r="110"
-                stroke="#30D158"
-                strokeWidth="6"
-                strokeDasharray="6 10"
-                fill="transparent"
-                className="animate-spin"
-                style={{ animationDuration: '24s' }}
-              />
-            )}
+              {activeSession && activeSession.mode === 'countdown' && (
+                <circle
+                  cx="128"
+                  cy="128"
+                  r="110"
+                  stroke={isRecovery ? '#64D2FF' : '#0A84FF'}
+                  strokeWidth="6"
+                  strokeDasharray={2 * Math.PI * 110}
+                  strokeDashoffset={2 * Math.PI * 110 * (1 - progressRatio)}
+                  strokeLinecap="round"
+                  fill="none"
+                  style={{ transition: 'stroke-dashoffset 0.4s linear' }}
+                />
+              )}
+              {activeSession && activeSession.mode === 'stopwatch' && (
+                <circle
+                  cx="128"
+                  cy="128"
+                  r="110"
+                  stroke="#30D158"
+                  strokeWidth="6"
+                  strokeDasharray="6 10"
+                  fill="none"
+                  className="animate-spin"
+                  style={{ animationDuration: '24s' }}
+                />
+              )}
+            </g>
           </svg>
 
           <div className="absolute flex flex-col items-center justify-center text-center">

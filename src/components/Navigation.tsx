@@ -53,7 +53,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                   strokeWidth={isActive ? 2.4 : 1.7}
                 />
                 {tab.badge && (
-                  <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-[#0A84FF] ring-2 ring-black animate-pulse" />
+                  <span className="absolute -top-0.5 -right-1 inline-block w-2 h-2 rounded-full bg-[#0A84FF] shadow-[0_0_6px_rgba(10,132,255,0.8)]" />
                 )}
               </div>
               <span
